@@ -13,12 +13,25 @@ class User(AbstractUser):
     )
     first_name = models.CharField(_('first name'), max_length=150)
     last_name = models.CharField(_('last name'), max_length=150)
+    favorites = models.ManyToManyField(
+        'api.Receipe',
+        related_name='in_favore',
+        verbose_name='Избранные рецепты',
+    )
+    subscribed_to=models.ManyToManyField(
+        'self',
+        related_name='subscribers',
+        symmetrical=False,
+        verbose_name='Подписки'
+    )
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         ordering = ['id']
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
 
     def __str__(self):
         return f'{self.username} ({self.email})'
