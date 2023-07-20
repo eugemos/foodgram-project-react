@@ -51,12 +51,12 @@ class Receipe(models.Model):
         related_name='receipes',
         verbose_name='Теги',
     )
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        related_name='receipes',
-        verbose_name='Ингредиенты',
-        through='IngredientOccurence',
-    )
+    # ingredients = models.ManyToManyField(
+    #     Ingredient,
+    #     related_name='receipes',
+    #     verbose_name='Ингредиенты',
+    #     through='IngredientOccurence',
+    # )
 
     class Meta:
         ordering = ['name']
@@ -72,13 +72,13 @@ class IngredientOccurence(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.PROTECT,
-        # related_name='receipes',
+        related_name='receipes',
         verbose_name='Ингредиент',
     )
     receipe = models.ForeignKey(
         Receipe,
         on_delete=models.CASCADE,
-        # related_name='ingredients',
+        related_name='ingredients',
         verbose_name='Рецепт',
     )
 
