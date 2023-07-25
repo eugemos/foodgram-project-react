@@ -63,53 +63,60 @@ class UserListViewTestCase(UsersViewsTestCase):
 
     def test_list_action_without_params(self):
         page_size = DEFAULT_PAGE_SIZE
-        instance_count = page_size
-        self.prepare(instance_count)
-        self._test_list_action(instance_count, 1, page_size)
+        self.prepare(instance_count=page_size, page_size=page_size)
+        self._test_list_action(1)
 
     def test_list_action_without_params_1(self):
         page_size = DEFAULT_PAGE_SIZE
-        instance_count = page_size + 1
-        self.prepare(instance_count)
-        self._test_list_action(instance_count, 1, page_size)
+        self.prepare(instance_count=page_size+1, page_size=page_size)
+        self._test_list_action(1)
 
     def test_list_action_with_params(self):
-        page_size = 5
-        instance_count = 16
-        self.prepare(instance_count)
+        self.prepare(instance_count=16, page_size=5)
         for page in range(1, 5):
             with self.subTest(page=page):
-                self._test_list_action(
-                    instance_count,
-                    page, page_size, 
-                    dict(limit=page_size, 
-                    page=page)
-                )
+                self._test_list_action(page, dict(limit=self.page_size, page=page))
 
-    def _test_list_action(self, instance_count, page, page_size, params=dict()):
-        response = self.client.get(self.BASE_URL, params, format='json', follow=True)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
-        kwargs = dict(count=instance_count)
-        page_count = instance_count // page_size + (instance_count % page_size > 0)
-        if page == 1:
-            kwargs.update(previous=None)
-        if page == page_count:
-            kwargs.update(next=None)
-
-        self.check_paginator_output(data, **kwargs)
-        last_page_size = page_size if instance_count % page_size == 0 else instance_count % page_size
-        self.check_object_list(
-            data['results'],
-            page_size if page != page_count else last_page_size,
-            (page - 1)*page_size + 1
-        )
-    
-    def prepare(self, instance_count):
+    def prepare(self, *, instance_count, page_size):
+        self.instance_count = instance_count
+        self.page_size = page_size
         for n in range(instance_count):
             self.create_test_instance(self.create_test_data(n))
 
         assert self.Model.objects.count() == instance_count
+        self.underfull_page_size = instance_count % page_size
+        self.page_count = (
+            instance_count // page_size 
+            + (self.underfull_page_size > 0)
+        )
+
+    def last_page_size(self):
+        return (
+            self.page_size 
+            if self.underfull_page_size == 0
+            else self.underfull_page_size
+        )
+
+    def _test_list_action(self, page, params=dict()):
+        response = self.client.get(self.BASE_URL, params, format='json', follow=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        kwargs = dict(count=self.instance_count)
+        
+        if page == 1:
+            kwargs.update(previous=None)
+        if page == self.page_count:
+            kwargs.update(next=None)
+
+        self.check_paginator_output(data, **kwargs)       
+        self.check_object_list(
+            data['results'],
+            self.page_size if page != self.page_count else self.last_page_size(),
+            (page - 1)*self.page_size + 1
+        )
+    
+    def get_previous_page_link(self):
+        pass
 
 
     def check_paginator_output(self, data, **kwargs):
