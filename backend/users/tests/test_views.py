@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -42,7 +43,7 @@ class UserListViewTestCase(UsersViewsTestCase):
         'username',
         'first_name',
         'last_name',
-        # 'is_subscribed', 
+        'is_subscribed', 
     )
 
     OUTPUT_PAGINATOR_FIELDS = (
@@ -66,6 +67,13 @@ class UserListViewTestCase(UsersViewsTestCase):
         self.prepare(instance_count=page_size, page_size=page_size)
         self._test_list_action(1)
 
+    def test_list_action_without_params_authenticated(self):
+        page_size = DEFAULT_PAGE_SIZE
+        self.prepare(instance_count=page_size, page_size=page_size)
+        self.client_user = get_user_model().objects.get(pk=1)
+        self.client.force_authenticate(user=self.client_user)
+        self._test_list_action(1)
+
     def test_list_action_without_params_1(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size+1, page_size=page_size)
@@ -78,10 +86,14 @@ class UserListViewTestCase(UsersViewsTestCase):
                 self._test_list_action(page, dict(limit=self.page_size, page=page))
 
     def prepare(self, *, instance_count, page_size):
+        self.client_user = AnonymousUser()
         self.instance_count = instance_count
         self.page_size = page_size
+        # self.aux_test_data = {}
         for n in range(instance_count):
-            self.create_test_instance(self.create_test_data(n))
+            instance = self.create_test_instance(self.create_test_data(n))
+            # self.aux_test_data[instance.pk] = dict(is_subscribed=False)
+
 
         assert self.Model.objects.count() == instance_count
         self.underfull_page_size = instance_count % page_size
@@ -98,17 +110,14 @@ class UserListViewTestCase(UsersViewsTestCase):
         )
 
     def _test_list_action(self, page, params=dict()):
-        response = self.client.get(self.BASE_URL, params, format='json', follow=True)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()        
+        self.response = self.client.get(self.BASE_URL, params, format='json', follow=True)
+        self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.check_paginator_output(
-            data, 
             count=self.instance_count,
             previous=self.previous_page_link(page, params),
             next=self.next_page_link(page, params),
         )       
         self.check_object_list(
-            data['results'],
             self.page_size if page != self.page_count else self.last_page_size(),
             (page - 1)*self.page_size + 1
         )
@@ -144,16 +153,30 @@ class UserListViewTestCase(UsersViewsTestCase):
         return f'{link}?{param_str}'
 
 
-    def check_paginator_output(self, data, **kwargs):
+    def check_paginator_output(self, **kwargs):
+        data = self.response.json()
         self.check_object_is_dict_with_proper_keys(data, self.OUTPUT_PAGINATOR_FIELDS)
         self.check_dict_has_proper_items(data, **kwargs)
 
-    def check_object_list(self, data, page_size, start_id):
+    def check_object_list(self, page_size, start_id):
+        data = self.response.json()['results']
         self.check_object_is_list_of_proper_length(data, page_size)
         for i in range(page_size):
             with self.subTest(i=i):
                 obj = data[i]
+                instance = self.Model.objects.get(pk=obj['id'])
                 self.check_object_is_dict_with_proper_keys(obj, self.OUTPUT_FIELDS)
                 self.assertEqual(obj['id'], i+start_id)
-                self.check_dict_has_proper_items(obj, self.Model.objects.get(pk=obj['id']))
+                self.check_dict_has_proper_items(
+                    obj,
+                    instance,
+                    # **self.aux_test_data[obj['id']]
+                    is_subscribed=self.is_client_subscribed(instance)
+                )
+
+    def is_client_subscribed(self, user):
+        if self.client_user.is_authenticated:
+            return user in self.client_user.subscribed_to.all()
+
+        return False
     
