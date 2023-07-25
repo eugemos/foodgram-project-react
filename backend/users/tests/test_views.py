@@ -6,11 +6,11 @@ from rest_framework import status
 # from . import utils
 
 DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
-
+TEST_HOST = 'http://testserver'
 
 class UsersViewsTestCase(APITestCase):
     Model = get_user_model()
-    BASE_URL = '/api/users'
+    BASE_URL = '/api/users/'
 
     def create_test_instance(self, data):
         return self.Model.objects.create(**data)
@@ -100,23 +100,48 @@ class UserListViewTestCase(UsersViewsTestCase):
     def _test_list_action(self, page, params=dict()):
         response = self.client.get(self.BASE_URL, params, format='json', follow=True)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
-        kwargs = dict(count=self.instance_count)
-        
-        if page == 1:
-            kwargs.update(previous=None)
-        if page == self.page_count:
-            kwargs.update(next=None)
-
-        self.check_paginator_output(data, **kwargs)       
+        data = response.json()        
+        self.check_paginator_output(
+            data, 
+            count=self.instance_count,
+            previous=self.previous_page_link(page, params),
+            next=self.next_page_link(page, params),
+        )       
         self.check_object_list(
             data['results'],
             self.page_size if page != self.page_count else self.last_page_size(),
             (page - 1)*self.page_size + 1
         )
     
-    def get_previous_page_link(self):
-        pass
+    def previous_page_link(self, page, request_params):
+        if page <= 1:
+            return None
+
+        link = TEST_HOST + self.BASE_URL        
+        params = []
+        if 'limit' in request_params:
+            params.append(f'limit={request_params["limit"]}')
+
+        prev_page = page - 1
+        if prev_page > 1:
+            params.append(f'page={prev_page}')
+
+        param_str = '&'.join(params)
+        return f'{link}?{param_str}' if param_str else link
+
+    def next_page_link(self, page, request_params):
+        if page >= self.page_count:
+            return None
+
+        link = TEST_HOST + self.BASE_URL        
+        params = []
+        if 'limit' in request_params:
+            params.append(f'limit={request_params["limit"]}')
+
+        next_page = page + 1
+        params.append(f'page={next_page}')
+        param_str = '&'.join(params)
+        return f'{link}?{param_str}'
 
 
     def check_paginator_output(self, data, **kwargs):
