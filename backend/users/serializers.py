@@ -9,8 +9,6 @@ class UserSerializer(DjoserUserSerializer):
         fields = DjoserUserSerializer.Meta.fields + ('is_subscribed',)
 
     def get_is_subscribed(self, user):
-        if self.context['request'].user.is_authenticated:
-            return True
-
-        return False
+        client_user = self.context['request'].user
+        return client_user.is_authenticated and client_user.is_subscribed_to(user)
 

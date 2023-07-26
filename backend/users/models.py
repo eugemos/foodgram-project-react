@@ -35,3 +35,12 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'{self.username} ({self.email})'
+
+    def is_subscribed_to(self, user):
+        return user in self.subscribed_to.all()
+
+    def subscribe_to(self, user):
+        self.subscribed_to.add(user)
+
+    def set_subscriptions(self, users):
+        self.subscribed_to.set(users)
