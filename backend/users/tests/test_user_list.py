@@ -1,42 +1,13 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
-from rest_framework.test import APITestCase
 from rest_framework import status
 
-# from . import utils
+from .base import UserEndpointTestCase, TEST_HOST
 
 DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
-TEST_HOST = 'http://testserver'
-
-class UsersViewsTestCase(APITestCase):
-    Model = get_user_model()
-    BASE_URL = '/api/users/'
-
-    def create_test_instance(self, data):
-        return self.Model.objects.create(**data)
-
-    def check_object_is_dict_with_proper_keys(self, obj, keys):
-        self.assertIsInstance(obj, dict)
-        self.assertEqual(set(obj.keys()), set(keys))
-
-    def check_object_is_list_of_proper_length(self, obj, length):
-        self.assertIsInstance(obj, list)
-        self.assertEqual(len(obj), length)
-
-    def check_dict_has_proper_items(self, d, obj=None, **kwargs):
-        if obj is not None:
-            for key in d:
-                with self.subTest(key=key):
-                    if hasattr(obj, key):
-                        self.assertEqual(d[key], getattr(obj, key))
-        
-        for key in kwargs:
-            with self.subTest(key=key):
-                self.assertEqual(d[key], kwargs[key])
 
 
-class UserListViewTestCase(UsersViewsTestCase):
+class UserListTestCase(UserEndpointTestCase):
     OUTPUT_FIELDS = (
         'id',
         'email',
@@ -107,12 +78,12 @@ class UserListViewTestCase(UsersViewsTestCase):
             + (self.underfull_page_size > 0)
         )
         if client_user_id:
-            self.client_user = get_user_model().objects.get(pk=client_user_id)
+            self.client_user = self.Model.objects.get(pk=client_user_id)
             self.client.force_authenticate(user=self.client_user)
            
-        for user in (get_user_model().objects.get(pk=pk) for pk in subscriptions):
+        for user in (self.Model.objects.get(pk=pk) for pk in subscriptions):
             user.set_subscriptions(
-                get_user_model().objects.get(pk=pk) for pk in subscriptions[user.pk]
+                self.Model.objects.get(pk=pk) for pk in subscriptions[user.pk]
             )
             
 
