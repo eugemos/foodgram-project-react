@@ -22,11 +22,6 @@ class UserCreateTestCase(UserEndpointTestCase):
         'password': 150,
     }
 
-    def extend_fields_to_max_length(self, data):
-        for key in data:
-            if key in self.MAX_LENGTHS:
-                data[key] = left_extend_str(data[key], self.MAX_LENGTHS[key])
-
     def test_create_action_with_correct_params(self):
         # Arrange
         assert self.Model.objects.count() == 0
@@ -49,9 +44,9 @@ class UserCreateTestCase(UserEndpointTestCase):
     def test_create_action_without_required_param(self):
         for param in self.REQUIRED_FIELDS:
             with self.subTest(what=f'Проверка реакции на отсутствие поля {param}'):
-                self._test_create_action_without_required_param(param)
+                self.subtest_create_action_without_required_param(param)
 
-    def _test_create_action_without_required_param(self, param_name):
+    def subtest_create_action_without_required_param(self, param_name):
         # Arrange
         assert self.Model.objects.count() == 0
         request_data = self.create_test_data(1, password='ZZaaqq11')
@@ -69,9 +64,9 @@ class UserCreateTestCase(UserEndpointTestCase):
     def test_create_action_with_too_long_param(self):
         for param, max_length in self.MAX_LENGTHS.items():
             with self.subTest(f'Проверка реакции на слишком длинное значение поля {param}'):
-                self._test_create_action_with_too_long_param(param, max_length)
+                self.subtest_create_action_with_too_long_param(param, max_length)
 
-    def _test_create_action_with_too_long_param(self, param_name, limit):
+    def subtest_create_action_with_too_long_param(self, param_name, limit):
         # Arrange
         assert self.Model.objects.count() == 0
         request_data = self.create_test_data(1, password='ZZaaqq11')
@@ -88,3 +83,7 @@ class UserCreateTestCase(UserEndpointTestCase):
         # Assert on DB
         self.assertEqual(self.Model.objects.count(), 0)
 
+    def extend_fields_to_max_length(self, data):
+        for key in data:
+            if key in self.MAX_LENGTHS:
+                data[key] = left_extend_str(data[key], self.MAX_LENGTHS[key])

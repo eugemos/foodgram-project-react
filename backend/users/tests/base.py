@@ -19,8 +19,15 @@ class UserEndpointTestCase(APITestCase):
         data.update(**kwargs)
         return data
 
+    def get_test_data_iter(self, count):
+        return (self.create_test_data(n) for n in range(count))
+
     def create_test_instance(self, data):
         return self.Model.objects.create(**data)
+
+    def create_test_instances(self, data_seq):
+        for data in data_seq:
+            self.create_test_instance(data)
 
     def check_data_is_dict_with_proper_keys(self, data, keys):
         self.assertIsInstance(data, dict)

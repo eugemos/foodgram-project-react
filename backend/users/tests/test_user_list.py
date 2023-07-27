@@ -29,28 +29,28 @@ class UserListTestCase(UserEndpointTestCase):
     def test_list_action_without_params(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size, page_size=page_size)
-        self._test_list_action(1)
+        self.perform_test(1)
 
     def test_list_action_without_params_authenticated(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size, page_size=page_size, client_user_id=1, subscriptions={1: (2,4,6)})
-        self._test_list_action(1)
+        self.perform_test(1)
 
     def test_list_action_without_params_1(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size+1, page_size=page_size)
-        self._test_list_action(1)
+        self.perform_test(1)
 
     def test_list_action_without_params_2(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size-1, page_size=page_size)
-        self._test_list_action(1)
+        self.perform_test(1)
 
     def test_list_action_with_params(self):
         self.prepare(instance_count=16, page_size=5)
         for page in range(1, 5):
             with self.subTest(page=page):
-                self._test_list_action(page, dict(limit=self.page_size, page=page))
+                self.perform_test(page, dict(limit=self.page_size, page=page))
 
     def prepare(self, *, 
                 instance_count, 
@@ -60,8 +60,7 @@ class UserListTestCase(UserEndpointTestCase):
         self.client_user = AnonymousUser()
         self.instance_count = instance_count
         self.page_size = page_size
-        for n in range(instance_count):
-            instance = self.create_test_instance(self.create_test_data(n))
+        self.create_test_instances(self.get_test_data_iter(self.instance_count))
 
         assert self.Model.objects.count() == instance_count
         self.underfull_page_size = instance_count % page_size
@@ -78,16 +77,10 @@ class UserListTestCase(UserEndpointTestCase):
                 self.Model.objects.get(pk=pk) for pk in subscriptions[user.pk]
             )
             
-
-    def last_page_size(self):
-        return (
-            self.page_size 
-            if self.underfull_page_size == 0
-            else self.underfull_page_size
-        )
-
-    def _test_list_action(self, page, params=dict()):
+    def perform_test(self, page, params=dict()):
+        # Act
         self.response = self.client.get(self.BASE_URL, params, format='json', follow=True)
+        # Assert
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.check_paginator_output(
             count=self.instance_count,
@@ -98,7 +91,28 @@ class UserListTestCase(UserEndpointTestCase):
             self.page_size if page != self.page_count else self.last_page_size(),
             (page - 1)*self.page_size + 1
         )
-    
+
+    def check_paginator_output(self, **kwargs):
+        data = self.response.json()
+        self.check_data_is_dict_with_proper_keys(data, self.OUTPUT_PAGINATOR_FIELDS)
+        self.check_data_is_dict_with_proper_items(data, **kwargs)
+
+    def check_object_list(self, page_size, start_id):
+        data = self.response.json()['results']
+        self.check_data_is_list_of_proper_length(data, page_size)
+        for i in range(page_size):
+            item = data[i]
+            pk = item['id']
+            instance = self.Model.objects.get(pk=pk)
+            with self.subTest(what=f'Проверка {i}-го элемента страницы (pk={pk})'):               
+                self.check_data_is_dict_with_proper_keys(item, self.OUTPUT_FIELDS)
+                self.assertEqual(pk, i+start_id)
+                self.check_data_is_dict_with_proper_items(
+                    item,
+                    instance,
+                    is_subscribed=self.is_client_subscribed(instance)
+                )
+
     def previous_page_link(self, page, request_params):
         if page <= 1:
             return None
@@ -129,28 +143,13 @@ class UserListTestCase(UserEndpointTestCase):
         param_str = '&'.join(params)
         return f'{link}?{param_str}'
 
-
-    def check_paginator_output(self, **kwargs):
-        data = self.response.json()
-        self.check_data_is_dict_with_proper_keys(data, self.OUTPUT_PAGINATOR_FIELDS)
-        self.check_data_is_dict_with_proper_items(data, **kwargs)
-
-    def check_object_list(self, page_size, start_id):
-        data = self.response.json()['results']
-        self.check_data_is_list_of_proper_length(data, page_size)
-        for i in range(page_size):
-            item = data[i]
-            pk = item['id']
-            instance = self.Model.objects.get(pk=pk)
-            with self.subTest(what=f'Проверка {i}-го элемента страницы (pk={pk})'):               
-                self.check_data_is_dict_with_proper_keys(item, self.OUTPUT_FIELDS)
-                self.assertEqual(pk, i+start_id)
-                self.check_data_is_dict_with_proper_items(
-                    item,
-                    instance,
-                    is_subscribed=self.is_client_subscribed(instance)
-                )
-
+    def last_page_size(self):
+        return (
+            self.page_size 
+            if self.underfull_page_size == 0
+            else self.underfull_page_size
+        )
+    
     def is_client_subscribed(self, user):
         return (self.client_user.is_authenticated 
                 and self.client_user.is_subscribed_to(user))
