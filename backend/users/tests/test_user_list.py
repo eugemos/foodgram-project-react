@@ -132,21 +132,21 @@ class UserListTestCase(UserEndpointTestCase):
 
     def check_paginator_output(self, **kwargs):
         data = self.response.json()
-        self.check_object_is_dict_with_proper_keys(data, self.OUTPUT_PAGINATOR_FIELDS)
-        self.check_dict_has_proper_items(data, **kwargs)
+        self.check_data_is_dict_with_proper_keys(data, self.OUTPUT_PAGINATOR_FIELDS)
+        self.check_data_is_dict_with_proper_items(data, **kwargs)
 
     def check_object_list(self, page_size, start_id):
         data = self.response.json()['results']
-        self.check_object_is_list_of_proper_length(data, page_size)
+        self.check_data_is_list_of_proper_length(data, page_size)
         for i in range(page_size):
-            obj = data[i]
-            pk = obj['id']
+            item = data[i]
+            pk = item['id']
             instance = self.Model.objects.get(pk=pk)
             with self.subTest(what=f'Проверка {i}-го элемента страницы (pk={pk})'):               
-                self.check_object_is_dict_with_proper_keys(obj, self.OUTPUT_FIELDS)
+                self.check_data_is_dict_with_proper_keys(item, self.OUTPUT_FIELDS)
                 self.assertEqual(pk, i+start_id)
-                self.check_dict_has_proper_items(
-                    obj,
+                self.check_data_is_dict_with_proper_items(
+                    item,
                     instance,
                     is_subscribed=self.is_client_subscribed(instance)
                 )

@@ -22,31 +22,27 @@ class UserEndpointTestCase(APITestCase):
     def create_test_instance(self, data):
         return self.Model.objects.create(**data)
 
-    def check_object_is_dict_with_proper_keys(self, obj, keys):
-        self.assertIsInstance(obj, dict)
-        self.assertEqual(set(obj.keys()), set(keys))
+    def check_data_is_dict_with_proper_keys(self, data, keys):
+        self.assertIsInstance(data, dict)
+        self.assertEqual(set(data.keys()), set(keys))
 
-    def check_object_is_list_of_proper_length(self, obj, length):
-        self.assertIsInstance(obj, list)
-        self.assertEqual(len(obj), length)
+    def check_data_is_list_of_proper_length(self, data, length):
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), length)
 
-    def check_dict_has_proper_items(self, d, obj=None, **kwargs):
-        if obj is not None:
-            for key in d:
+    def check_data_is_dict_with_proper_items(self, data, instance=None, **kwargs):
+        if instance is not None:
+            for key in data:
                 with self.subTest(key=key):
-                    if hasattr(obj, key):
-                        self.assertEqual(d[key], getattr(obj, key))
+                    if hasattr(instance, key):
+                        self.assertEqual(data[key], getattr(instance, key))
         
         for key in kwargs:
             with self.subTest(key=key):
-                self.assertEqual(d[key], kwargs[key])
+                self.assertEqual(data[key], kwargs[key])
 
-    def check_object_corresponds_instance(self, obj, instance):
-        self.assertIsInstance(obj, dict)
-        for key in obj:
-            with self.subTest(key=key):
-                if hasattr(instance, key):
-                    self.assertEqual(obj[key], getattr(instance, key))
+    def check_instance(self, instance, data):
+        self.check_data_is_dict_with_proper_items(data, instance)
 
 
 def left_extend_str(s, dest_size, char='q'):
