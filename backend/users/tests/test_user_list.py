@@ -26,14 +26,6 @@ class UserListTestCase(UserEndpointTestCase):
 
     DEFAULT_SUBSCRIPTIONS = {1: (2,)}
 
-    def create_test_data(self, n):
-        return dict(
-            email=f'User_{n}@email.to',
-            username=f'user_{n}',
-            first_name = f'FirstName_{n}',
-            last_name = f'LastName_{n}',
-        )
-
     def test_list_action_without_params(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size, page_size=page_size)
