@@ -1,5 +1,8 @@
 from djoser.serializers import UserSerializer as DjoserUserSerializer
+from djoser.serializers import UserCreateSerializer as DjoserUserCreateSerializer
 from rest_framework import serializers
+
+from users.models import MAX_PASSWORD_LENGTH
 
 
 class UserSerializer(DjoserUserSerializer):
@@ -12,3 +15,10 @@ class UserSerializer(DjoserUserSerializer):
         client_user = self.context['request'].user
         return client_user.is_authenticated and client_user.is_subscribed_to(user)
 
+
+class UserCreateSerializer(DjoserUserCreateSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True, max_length=MAX_PASSWORD_LENGTH)
+
+    class Meta(DjoserUserCreateSerializer.Meta):
+        pass
+    

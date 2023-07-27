@@ -2,8 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
+
+MAX_PASSWORD_LENGTH = 150
+
 class User(AbstractUser):
-    password = models.CharField(_('password'), max_length=150)
+    password = models.CharField(_('password'), max_length=MAX_PASSWORD_LENGTH)
     email = models.EmailField(
         _('email address'),
         unique=True,
