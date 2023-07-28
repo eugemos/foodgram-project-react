@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from rest_framework import status
 
-from .base import UserEndpointTestCase, TEST_HOST, left_extend_str
+from .base import UserEndpointTestCase, TEST_HOST, left_extend_str, get_model_pk_set
 
 
 class UserCreateTestCase(UserEndpointTestCase):
@@ -30,118 +30,126 @@ class UserCreateTestCase(UserEndpointTestCase):
     }
 
     def test_request_with_correct_params_ok(self):
-        # Arrange
-        assert self.Model.objects.count() == 0
         request_data = self.create_test_data(1, password='ZZaaqq11'*10)
         self.extend_fields_to_max_length(request_data)
         exp_response_data = self.create_test_data(1, id=1)
         self.extend_fields_to_max_length(exp_response_data)
-        # Act
-        self.response = self.client.post(self.BASE_URL, request_data, format='json')
-        # Assert on response
-        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
-        response_data = self.response.json()
-        self.assertEqual(response_data, exp_response_data)
-        # Assert on DB
-        self.assertEqual(self.Model.objects.count(), 1)
-        instance = self.Model.objects.get(pk=1)
-        self.check_instance(instance, response_data,)
-        self.assertTrue(instance.check_password(request_data['password']))
+        self.check_create_reqest_ok(request_data, exp_response_data)
 
     def test_request_without_required_param_fails(self):
-        for param in self.REQUIRED_FIELDS:
-            with self.subTest(what=f'Проверка реакции на отсутствие поля {param}'):
-                self.subtest_request_without_required_param_fails(param)
-
-    def subtest_request_without_required_param_fails(self, param_name):
-        # Arrange
-        assert self.Model.objects.count() == 0
-        request_data = self.create_test_data(1, password='ZZaaqq11')
-        del request_data[param_name]
-        exp_response_data = {param_name: ['Обязательное поле.']}
-        # Act
-        self.response = self.client.post(self.BASE_URL, request_data, format='json')
-        # Assert on response
-        self.assertEqual(self.response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_data = self.response.json()
-        self.assertEqual(response_data, exp_response_data)
-        # Assert on DB
-        self.assertEqual(self.Model.objects.count(), 0)
+        for field in self.REQUIRED_FIELDS:
+            with self.subTest(what=f'Проверка реакции на отсутствие поля {field}'):
+                self.subtest_request_without_required_param_fails(field)
 
     def test_request_with_too_long_param_fails(self):
-        for param, max_length in self.MAX_LENGTHS.items():
-            with self.subTest(f'Проверка реакции на слишком длинное значение поля {param}'):
-                self.subtest_request_with_too_long_param_fails(param, max_length)
+        for field, max_length in self.MAX_LENGTHS.items():
+            with self.subTest(f'Проверка реакции на слишком длинное значение поля {field}'):
+                self.subtest_request_with_too_long_param_fails(field, max_length)
 
-    def subtest_request_with_too_long_param_fails(self, param_name, limit):
-        # Arrange
-        assert self.Model.objects.count() == 0
+    def test_request_with_non_unique_username_fails(self):
+        self.check_request_with_non_unique_param_fails('username')
+
+    def test_request_with_non_unique_email_fails(self):
+        self.check_request_with_non_unique_param_fails('email')
+
+    def test_request_with_non_unique_first_name_ok(self):
+        self.check_request_with_non_unique_param_ok('first_name')
+
+    def test_request_with_non_unique_last_name_ok(self):
+        self.check_request_with_non_unique_param_ok('last_name')
+
+    def test_request_with_non_unique_password_ok(self):
+        self.check_request_with_non_unique_param_ok('password')
+
+    def test_request_with_invalid_email_fails(self):
+        self.check_request_with_invalid_param_fails(
+            'email', 
+            'email.ru', 
+            'Введите правильный адрес электронной почты.'
+        )
+
+    def test_request_with_invalid_username_fails(self):
+        self.check_request_with_invalid_param_fails(
+            'username',
+            'user%name', 
+            'Введите правильное имя пользователя. '
+            'Оно может содержать только буквы, цифры и знаки @/./+/-/_.'
+        )
+
+    def subtest_request_without_required_param_fails(self, field_name):
         request_data = self.create_test_data(1, password='ZZaaqq11')
-        param_value = request_data[param_name]
-        param_value = left_extend_str(param_value, limit + 1)
-        request_data[param_name] = param_value
-        exp_response_data = {param_name: [f'Убедитесь, что это значение содержит не более {limit} символов.']}
-        # Act
-        self.response = self.client.post(self.BASE_URL, request_data, format='json')
-        # Assert on response
-        self.assertEqual(self.response.status_code, status.HTTP_400_BAD_REQUEST)
-        response_data = self.response.json()
-        self.assertEqual(response_data, exp_response_data)
-        # Assert on DB
-        self.assertEqual(self.Model.objects.count(), 0)
+        del request_data[field_name]
+        exp_response_data = {field_name: ['Обязательное поле.']}
+        self.check_create_reqest_fails(request_data, exp_response_data)
 
-    def test_request_with_non_unique_param_fails(self):
-        fixture_data = self.create_test_data(1, password='ZZaaqq11')
-        self.create_test_instance(fixture_data)
-        for field in (f for f in self.INPUT_FIELDS if f in self.UNIQUE_FIELDS):
-            with self.subTest(field=field):
-                self.subtest_request_with_non_unique_param_fails(
-                    field, fixture_data[field])
+    def subtest_request_with_too_long_param_fails(self, field_name, limit):
+        sample_data = self.create_test_data(1, password='ZZaaqq11')
+        self.check_request_with_invalid_param_fails(
+            field_name,
+            left_extend_str(sample_data[field_name], limit + 1),
+            f'Убедитесь, что это значение содержит не более {limit} символов.'
+        )
 
-    def subtest_request_with_non_unique_param_fails(self, field_name, field_value):
-        assert self.Model.objects.count() == 1
+    def check_request_with_non_unique_param_fails(self, field_name):
+        assert field_name in self.UNIQUE_FIELDS
+        fixture_data = self.create_fixture_instance()
+        self.check_request_with_invalid_param_fails(
+            field_name,
+            fixture_data[field_name],
+            self.UNIQUE_FIELDS[field_name]
+        )
+
+    def check_request_with_non_unique_param_ok(self, field_name):
+        assert field_name not in self.UNIQUE_FIELDS
+        fixture_data = self.create_fixture_instance()
+        request_data = self.create_test_data(2, password='ZZaaqq22')
+        request_data[field_name] = fixture_data[field_name]
+        exp_response_data = self.create_test_data(2, id=2)
+        if field_name in exp_response_data:
+            exp_response_data[field_name] = fixture_data[field_name]
+
+        self.check_create_reqest_ok(request_data, exp_response_data)
+
+    def check_request_with_invalid_param_fails(self, field_name, field_value, error_msg):
         request_data = self.create_test_data(2, password='ZZaaqq22')
         request_data[field_name] = field_value
-        exp_response_data = {field_name: [self.UNIQUE_FIELDS[field_name]]}
+        exp_response_data = {field_name: [error_msg]}
+        self.check_create_reqest_fails(request_data, exp_response_data)
+
+    def check_create_reqest_ok(self, request_data, exp_response_data):
+        initial_model_pk_set = get_model_pk_set(self.Model)
+        # Act, Assert on response
+        response_data = self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_201_CREATED)
+        # Assert on DB
+        result_model_pk_set = get_model_pk_set(self.Model)
+        self.assertTrue(initial_model_pk_set <= result_model_pk_set)
+        new_model_pks = tuple(result_model_pk_set - initial_model_pk_set)
+        self.assertEqual(len(new_model_pks), 1)
+        instance = self.Model.objects.get(pk=new_model_pks[0])
+        self.check_instance(instance, response_data)
+        self.assertTrue(instance.check_password(request_data['password']))
+
+    def check_create_reqest_fails(self, request_data, exp_response_data):
+        initial_model_pk_set = get_model_pk_set(self.Model)
+        # Act, Assert on response
+        self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_400_BAD_REQUEST)
+        # Assert on DB
+        result_model_pk_set = get_model_pk_set(self.Model)
+        self.assertEqual(initial_model_pk_set, result_model_pk_set)
+
+    def do_request_and_check_response(self, request_data, exp_response_data, exp_status):
         # Act
         self.response = self.client.post(self.BASE_URL, request_data, format='json')
         # Assert on response
-        self.assertEqual(self.response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.response.status_code, exp_status)
         response_data = self.response.json()
         self.assertEqual(response_data, exp_response_data)
-        # Assert on DB
-        self.assertEqual(self.Model.objects.count(), 1)
+        return response_data
 
-    def test_request_with_non_unique_param_ok(self):
+    def create_fixture_instance(self):
         fixture_data = self.create_test_data(1, password='ZZaaqq11')
         self.create_test_instance(fixture_data)
-        assert self.Model.objects.count() == 1
-        for n, field in enumerate(
-            (f for f in self.INPUT_FIELDS if f not in self.UNIQUE_FIELDS),
-            2
-        ):
-            with self.subTest(field=field):
-                self.subtest_request_with_non_unique_param_ok(
-                    field, fixture_data[field], n)
-
-    def subtest_request_with_non_unique_param_ok(self, field_name, field_value, n):
-        assert self.Model.objects.count() == n - 1
-        request_data = self.create_test_data(n, password='ZZaaqq11'+str(n))
-        request_data[field_name] = field_value
-        exp_response_data = self.create_test_data(n, id=n)
-        if field_name in exp_response_data:
-            exp_response_data[field_name] = field_value       
-        # Act
-        self.response = self.client.post(self.BASE_URL, request_data, format='json')
-        # Assert on response
-        self.assertEqual(self.response.status_code, status.HTTP_201_CREATED)
-        response_data = self.response.json()
-        self.assertEqual(response_data, exp_response_data)
-        # Assert on DB
-        self.assertEqual(self.Model.objects.count(), n)
-        instance = self.Model.objects.get(pk=n)
-        self.check_instance(instance, response_data,)
-        self.assertTrue(instance.check_password(request_data['password']))
+        return fixture_data
 
     def extend_fields_to_max_length(self, data):
         for key in data:

@@ -52,5 +52,8 @@ class UserEndpointTestCase(APITestCase):
         self.check_data_is_dict_with_proper_items(data, instance)
 
 
+def get_model_pk_set(model):
+    return set(instance.pk for instance in model.objects.all())
+    
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s
