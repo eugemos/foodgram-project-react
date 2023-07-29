@@ -60,7 +60,7 @@ class UserListTestCase(UserEndpointTestCase):
         self.client_user = AnonymousUser()
         self.instance_count = instance_count
         self.page_size = page_size
-        self.create_test_instances(self.get_test_data_iter(self.instance_count))
+        self.create_instances(self.get_data_iter(range(self.instance_count)))
 
         assert self.Model.objects.count() == instance_count
         self.underfull_page_size = instance_count % page_size

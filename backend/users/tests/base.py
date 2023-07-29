@@ -9,25 +9,42 @@ class UserEndpointTestCase(APITestCase):
     Model = get_user_model()
     BASE_URL = '/api/users/'
 
-    def create_test_data(self, n, **kwargs):
+    @classmethod
+    def get_instance_data(cls, instance, **kwargs):
+        data = {
+            field_name: getattr(instance, field_name)
+            for field_name in (
+                'id', 'email', 'username', 'first_name', 'last_name'
+            )
+        }
+        data.update(**kwargs)
+        return data
+        
+    @classmethod
+    def create_data(cls, *, n='test', **kwargs):
         data = dict(
-            email=f'test_{n}@email.ru',
-            username=f'test_{n}',
+            # id = id,
+            email=f'mail_{n}@email.any',
+            username=f'user_{n}',
             first_name=f'first_name_{n}',
             last_name=f'last_name_{n}',
         )
         data.update(**kwargs)
         return data
 
-    def get_test_data_iter(self, count):
-        return (self.create_test_data(n) for n in range(count))
+    @classmethod
+    def get_data_iter(cls, iter):
+        return (cls.create_data(n=i) for i in iter)
 
-    def create_test_instance(self, data):
-        return self.Model.objects.create(**data)
+    @classmethod
+    def create_instance(cls, data, **kwargs):
+        data.update(**kwargs)
+        return cls.Model.objects.create(**data)
 
-    def create_test_instances(self, data_seq):
+    @classmethod
+    def create_instances(cls, data_seq):
         for data in data_seq:
-            self.create_test_instance(data)
+            cls.create_instance(data)
 
     def check_data_is_dict_with_proper_keys(self, data, keys):
         self.assertIsInstance(data, dict)
@@ -48,8 +65,21 @@ class UserEndpointTestCase(APITestCase):
             with self.subTest(key=key):
                 self.assertEqual(data[key], kwargs[key])
 
-    def check_instance(self, instance, data):
-        self.check_data_is_dict_with_proper_items(data, instance)
+    # def check_instance(self, instance, data):
+    #     self.check_data_is_dict_with_proper_items(data, instance)
+
+    def do_request_and_check_response(
+        self, client, method, url, request_data, exp_response_data, exp_status, **kwargs
+    ):
+        func = getattr(client, method)
+        # Act
+        self.response = func(url, request_data, format='json', **kwargs)
+        # Assert on response
+        with self.subTest():
+            self.assertEqual(self.response.status_code, exp_status)
+        response_data = self.response.json()
+        self.assertEqual(response_data, exp_response_data)
+        return response_data
 
 
 def get_model_pk_set(model):
