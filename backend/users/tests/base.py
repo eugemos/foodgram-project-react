@@ -65,9 +65,6 @@ class UserEndpointTestCase(APITestCase):
             with self.subTest(key=key):
                 self.assertEqual(data[key], kwargs[key])
 
-    # def check_instance(self, instance, data):
-    #     self.check_data_is_dict_with_proper_items(data, instance)
-
     def do_request_and_check_response(
         self, client, method, url, request_data, exp_response_data, exp_status, **kwargs
     ):
