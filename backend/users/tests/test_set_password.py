@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .base import UserEndpointTestCase, left_extend_str
+from core.tests.base import left_extend_str
+from .base import UserEndpointTestCase 
 
 
 class SetPasswordTestCase(UserEndpointTestCase):

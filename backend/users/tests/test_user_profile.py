@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from .base import UserEndpointTestCase, TEST_HOST
+from .base import UserEndpointTestCase 
 
 
 class UserProfileTestCase(UserEndpointTestCase):

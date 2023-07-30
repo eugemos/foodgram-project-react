@@ -1,8 +1,9 @@
-from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
+from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 
-from .base import UserEndpointTestCase, TEST_HOST, left_extend_str, get_model_pk_set
+from core.tests.base import left_extend_str, get_model_pk_set
+from .base import UserEndpointTestCase 
 
 
 class UserCreateTestCase(UserEndpointTestCase):

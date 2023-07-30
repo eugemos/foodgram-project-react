@@ -2,7 +2,9 @@ from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from rest_framework import status
 
-from .base import UserEndpointTestCase, TEST_HOST
+from core.tests.base import TEST_HOST
+from .base import UserEndpointTestCase
+
 
 DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
 
