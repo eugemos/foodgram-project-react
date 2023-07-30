@@ -49,7 +49,7 @@ class UserProfileTestCase(UserEndpointTestCase):
     def do_request_and_check_response(
         self, client, exp_response_data, exp_status
     ):
-        super().do_request_and_check_response(
+        return super().do_request_and_check_response(
             client, 'get', f'{self.BASE_URL}me/', 
             None, exp_response_data, exp_status
         )
