@@ -12,15 +12,16 @@ class EndpointTestCase(APITestCase):
         self, client, method, url, request_data, exp_response_data, exp_status, **kwargs
     ):
         func = getattr(client, method)
-        # Act
         self.response = func(url, request_data, format='json', **kwargs)
-        # Assert on response
         with self.subTest():
             self.assertEqual(self.response.status_code, exp_status)
+        
+        if exp_response_data == ():
+            return None
+
         response_data = self.response.json()
         self.assertEqual(response_data, exp_response_data)
-        return response_data
-
+        return response_data        
 
 class EndpointModelMixin:
     @classmethod
@@ -49,6 +50,11 @@ class UserEndpointTestCase(EndpointTestCase, EndpointModelMixin):
         'id', 'email', 'username', 'first_name', 'last_name'
     )
     BASE_URL = '/api/users/'
+
+    @classmethod
+    def create_instance(cls, data, **kwargs):
+        data.update(**kwargs)
+        return cls.Model.objects.create_user(**data)
 
     @classmethod
     def create_data(cls, *, n='test', **kwargs):
@@ -83,6 +89,10 @@ class UserEndpointTestCase(EndpointTestCase, EndpointModelMixin):
         for key in kwargs:
             with self.subTest(key=key):
                 self.assertEqual(data[key], kwargs[key])
+
+
+class AuthEndpointTestCase(EndpointTestCase):
+    BASE_URL = '/api/auth/token/'
 
 
 def get_model_pk_set(model):
