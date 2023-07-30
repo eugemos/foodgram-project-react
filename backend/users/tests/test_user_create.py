@@ -68,6 +68,13 @@ class UserCreateTestCase(UserEndpointTestCase):
     def test_request_with_non_unique_password_ok(self):
         self.check_request_with_non_unique_param_ok('password')
 
+    def test_request_with_too_weak_password_fails(self):
+        self.check_request_with_invalid_param_fails(
+            'password', 
+            'q'*8, 
+            'Введённый пароль слишком широко распространён.'
+        )
+
     def test_request_with_invalid_email_fails(self):
         self.check_request_with_invalid_param_fails(
             'email', 
