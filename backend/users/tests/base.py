@@ -91,8 +91,9 @@ class UserEndpointTestCase(EndpointTestCase, EndpointModelMixin):
                 self.assertEqual(data[key], kwargs[key])
 
 
-class AuthEndpointTestCase(EndpointTestCase):
+class AuthEndpointTestCase(UserEndpointTestCase):
     BASE_URL = '/api/auth/token/'
+    # Model = get_user_model()
 
 
 def get_model_pk_set(model):
