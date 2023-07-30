@@ -7,10 +7,12 @@ from .base import AuthEndpointTestCase
 
 class GetTokenTestCase(AuthEndpointTestCase):
     USER_PASSWORD = 'ZZaaqq11'
-    LOGIN_IMPOSSIBLE_MESSAGE = (
-        'Невозможно войти с предоставленными учетными данными.'
-    )
-       
+    EXP_ERROR_RESPONSE_DATA = {
+        'non_field_errors': [
+            'Невозможно войти с предоставленными учетными данными.'
+        ]
+    }
+
     def setUp(self):
         super().setUp()
         self.user = self.create_instance(
@@ -53,18 +55,12 @@ class GetTokenTestCase(AuthEndpointTestCase):
     ):
         request_data = self.request_data.copy()
         request_data[field_name] = field_value
-        exp_response_data = {
-            'non_field_errors': [self.LOGIN_IMPOSSIBLE_MESSAGE]
-        }
-        self.check_request_fails(request_data, exp_response_data)
+        self.check_request_fails(request_data, self.EXP_ERROR_RESPONSE_DATA)
 
     def check_request_without_required_param_fails(self, field_name):
         request_data = self.request_data.copy()
         del request_data[field_name]
-        exp_response_data = {
-            'non_field_errors': [self.LOGIN_IMPOSSIBLE_MESSAGE]
-        }
-        self.check_request_fails(request_data, exp_response_data)
+        self.check_request_fails(request_data, self.EXP_ERROR_RESPONSE_DATA)
 
     def check_request_fails(self, request_data, exp_response_data):
         self.do_anon_request_and_check_response(
@@ -73,7 +69,6 @@ class GetTokenTestCase(AuthEndpointTestCase):
         self.assertFalse(
             Token.objects.filter(user=self.user).exists()
         )
-
 
     def do_anon_request_and_check_response(
         self, request_data, exp_response_data, exp_status
