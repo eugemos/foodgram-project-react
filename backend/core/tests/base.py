@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 
 
@@ -22,7 +23,7 @@ class EndpointTestCase(APITestCase):
         return response_data        
 
 
-class EndpointModelMixin:
+class TestModel:
     @classmethod
     def get_instance_data(cls, instance, **kwargs):
         data = {
@@ -34,6 +35,12 @@ class EndpointModelMixin:
 
     @classmethod
     def create_instance(cls, data, **kwargs):
+        if not isinstance(data, dict):
+            if data is None:
+                data = self.create_data()
+            else:
+                data = self.create_data(data)
+
         data.update(**kwargs)
         return cls.Model.objects.create(**data)
 
@@ -41,6 +48,34 @@ class EndpointModelMixin:
     def create_instances(cls, data_seq):
         for data in data_seq:
             cls.create_instance(data)
+
+    @classmethod
+    def get_pk_set(cls):
+        return set(instance.pk for instance in cls.Model.objects.all())
+
+
+class TestUser(TestModel):
+    Model = get_user_model()
+    INSTANCE_FIELDS = (
+        'id', 'email', 'username', 'first_name', 'last_name'
+    )
+
+    @classmethod
+    def create_instance(cls, data, **kwargs):
+        data.update(**kwargs)
+        return cls.Model.objects.create_user(**data)
+
+    @classmethod
+    def create_data(cls, *, n='test', **kwargs):
+        data = dict(
+            email=f'mail_{n}@email.any',
+            username=f'user_{n}',
+            first_name=f'first_name_{n}',
+            last_name=f'last_name_{n}',
+        )
+        data.update(**kwargs)
+        return data
+
 
 
 def get_model_pk_set(model):

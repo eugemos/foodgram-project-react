@@ -1,30 +1,8 @@
-from django.contrib.auth import get_user_model
-
-from core.tests.base import EndpointTestCase, EndpointModelMixin
+from core.tests.base import EndpointTestCase, TestUser
 
 
-class UserEndpointTestCase(EndpointTestCase, EndpointModelMixin):
-    Model = get_user_model()
-    INSTANCE_FIELDS = (
-        'id', 'email', 'username', 'first_name', 'last_name'
-    )
+class UserEndpointTestCase(EndpointTestCase, TestUser):
     BASE_URL = '/api/users/'
-
-    @classmethod
-    def create_instance(cls, data, **kwargs):
-        data.update(**kwargs)
-        return cls.Model.objects.create_user(**data)
-
-    @classmethod
-    def create_data(cls, *, n='test', **kwargs):
-        data = dict(
-            email=f'mail_{n}@email.any',
-            username=f'user_{n}',
-            first_name=f'first_name_{n}',
-            last_name=f'last_name_{n}',
-        )
-        data.update(**kwargs)
-        return data
 
     @classmethod
     def get_data_iter(cls, iter):
@@ -50,5 +28,5 @@ class UserEndpointTestCase(EndpointTestCase, EndpointModelMixin):
                 self.assertEqual(data[key], kwargs[key])
 
 
-class AuthEndpointTestCase(UserEndpointTestCase):
+class AuthEndpointTestCase(EndpointTestCase, TestUser):
     BASE_URL = '/api/auth/token/'
