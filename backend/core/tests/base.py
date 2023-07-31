@@ -18,6 +18,7 @@ class EndpointTestCase(APITestCase):
         if exp_response_data == ():
             return None
 
+        # print(f'\n{self.response.content}\n')
         response_data = self.response.json()
         self.assertEqual(response_data, exp_response_data)
         return response_data        
@@ -37,9 +38,9 @@ class TestModel:
     def create_instance(cls, data, **kwargs):
         if not isinstance(data, dict):
             if data is None:
-                data = self.create_data()
+                data = cls.create_data()
             else:
-                data = self.create_data(data)
+                data = cls.create_data(n=data)
 
         data.update(**kwargs)
         return cls.Model.objects.create(**data)
