@@ -1,5 +1,8 @@
 from django.contrib.auth import get_user_model
+from rest_framework import status
 from rest_framework.test import APITestCase
+
+from api.models import Tag
 
 
 TEST_HOST = 'http://testserver'
@@ -8,7 +11,8 @@ TEST_HOST = 'http://testserver'
 class EndpointTestCase(APITestCase):
 
     def do_request_and_check_response(
-        self, client, method, url, request_data, exp_response_data, exp_status, **kwargs
+        self, client, method, url, request_data, 
+        exp_response_data, exp_status, **kwargs
     ):
         func = getattr(client, method)
         self.response = func(url, request_data, format='json', **kwargs)
@@ -22,6 +26,57 @@ class EndpointTestCase(APITestCase):
         response_data = self.response.json()
         self.assertEqual(response_data, exp_response_data)
         return response_data        
+
+
+class TestSimpleListMixin:
+
+    def test_anon_request_ok(self):
+        self.create_instances((1,2,3))
+        exp_response_data = [
+            self.get_instance_data(instance) 
+            for instance in self.Model.objects.all()
+        ]
+        self.do_anon_request_and_check_response(
+            exp_response_data, status.HTTP_200_OK
+        )
+        
+    def test_anon_request_ok_with_empty_db(self):
+        self.do_anon_request_and_check_response([], status.HTTP_200_OK)
+
+    def do_anon_request_and_check_response(
+        self, exp_response_data, exp_status
+    ):
+        return super().do_request_and_check_response(
+            self.client, 'get', self.BASE_URL, 
+            None, exp_response_data, exp_status
+        )
+
+
+class TestSimpleDetailMixin:
+    INSTANCE_COUNT = 3
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.create_instances(range(1, cls.INSTANCE_COUNT + 1))
+
+    def test_anon_request_to_existent_tag_ok(self):
+        id = self.INSTANCE_COUNT
+        exp_response_data = self.get_instance_data(self.Model.objects.get(id=id))
+        self.do_anon_request_and_check_response(id, exp_response_data, status.HTTP_200_OK)
+
+    def test_anon_request_to_unexistent_tag_fails(self):
+        id = self.INSTANCE_COUNT + 1
+        exp_response_data = {'detail': 'Страница не найдена.'}
+        self.do_anon_request_and_check_response(id, exp_response_data, status.HTTP_404_NOT_FOUND)
+
+    def do_anon_request_and_check_response(
+        self, id, exp_response_data, exp_status
+    ):
+        return super().do_request_and_check_response(
+            self.client, 'get', f'{self.BASE_URL}{id}/', 
+            None, exp_response_data, exp_status
+        )    
 
 
 class TestModel:
@@ -77,6 +132,23 @@ class TestUser(TestModel):
         data.update(**kwargs)
         return data
 
+class TestTag(TestModel):
+    Model = Tag
+    INSTANCE_FIELDS = (
+        'id', 'name', 'color', 'slug', 
+    )
+
+    @classmethod
+    def create_data(cls, *, n=0, **kwargs):
+        n = int(n)
+        color = format(n, '5>6x')
+        data = dict(
+            name=f'name_{n}',
+            color=f'#{color}',
+            slug=f'slug_{n}',
+        )
+        data.update(**kwargs)
+        return data
 
 
 def get_model_pk_set(model):
