@@ -45,11 +45,11 @@ class TestSimpleListMixin:
         self.do_anon_request_and_check_response([], status.HTTP_200_OK)
 
     def do_anon_request_and_check_response(
-        self, exp_response_data, exp_status
+        self, exp_response_data, exp_status, *, request_data=None
     ):
         return super().do_request_and_check_response(
             self.client, 'get', self.BASE_URL, 
-            None, exp_response_data, exp_status
+            request_data, exp_response_data, exp_status
         )
 
 
@@ -164,11 +164,12 @@ class TestIngredient(TestModel):
     INSTANCE_FIELDS = (
         'id', 'name', 'measurement_unit',
     )
+    NAME_PREFIX = 'No'
 
     @classmethod
     def create_data(cls, *, n='test', **kwargs):
         data = dict(
-            name=f'name_{n}',
+            name=f'{cls.NAME_PREFIX}{n}_ingredient',
             measurement_unit=f'measure_{n}',
         )
         data.update(**kwargs)
