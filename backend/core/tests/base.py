@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from api.models import Tag
+from api.models import Tag, Ingredient
 
 
 TEST_HOST = 'http://testserver'
@@ -29,9 +29,10 @@ class EndpointTestCase(APITestCase):
 
 
 class TestSimpleListMixin:
+    INSTANCE_COUNT = 3
 
     def test_anon_request_ok(self):
-        self.create_instances((1,2,3))
+        self.create_instances(range(1, self.INSTANCE_COUNT+1))
         exp_response_data = [
             self.get_instance_data(instance) 
             for instance in self.Model.objects.all()
@@ -61,14 +62,22 @@ class TestSimpleDetailMixin:
         cls.create_instances(range(1, cls.INSTANCE_COUNT + 1))
 
     def test_anon_request_to_existent_tag_ok(self):
-        id = self.INSTANCE_COUNT
-        exp_response_data = self.get_instance_data(self.Model.objects.get(id=id))
-        self.do_anon_request_and_check_response(id, exp_response_data, status.HTTP_200_OK)
+        for id in(1, (1 + self.INSTANCE_COUNT) // 2, self.INSTANCE_COUNT):
+            with self.subTest(id=id):
+                exp_response_data = self.get_instance_data(
+                    self.Model.objects.get(id=id)
+                )
+                self.do_anon_request_and_check_response(
+                    id, exp_response_data, status.HTTP_200_OK
+                )
 
     def test_anon_request_to_unexistent_tag_fails(self):
-        id = self.INSTANCE_COUNT + 1
-        exp_response_data = {'detail': 'Страница не найдена.'}
-        self.do_anon_request_and_check_response(id, exp_response_data, status.HTTP_404_NOT_FOUND)
+        for id in (0, self.INSTANCE_COUNT + 1):
+            with self.subTest(id=id):
+                exp_response_data = {'detail': 'Страница не найдена.'}
+                self.do_anon_request_and_check_response(
+                    id, exp_response_data, status.HTTP_404_NOT_FOUND
+                )
 
     def do_anon_request_and_check_response(
         self, id, exp_response_data, exp_status
@@ -149,6 +158,23 @@ class TestTag(TestModel):
         )
         data.update(**kwargs)
         return data
+
+class TestIngredient(TestModel):
+    Model = Ingredient
+    INSTANCE_FIELDS = (
+        'id', 'name', 'measurement_unit',
+    )
+
+    @classmethod
+    def create_data(cls, *, n='test', **kwargs):
+        data = dict(
+            name=f'name_{n}',
+            measurement_unit=f'measure_{n}',
+        )
+        data.update(**kwargs)
+        return data
+
+
 
 
 def get_model_pk_set(model):
