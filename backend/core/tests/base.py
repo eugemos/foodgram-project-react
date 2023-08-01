@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -29,10 +30,10 @@ class EndpointTestCase(APITestCase):
 
 
 class TestSimpleListMixin:
-    INSTANCE_COUNT = 3
-
+    
     def test_anon_request_ok(self):
-        self.create_instances(range(1, self.INSTANCE_COUNT+1))
+        INSTANCE_COUNT = 3
+        self.create_instances(range(1, INSTANCE_COUNT+1))
         exp_response_data = [
             self.get_instance_data(instance) 
             for instance in self.Model.objects.all()
@@ -178,3 +179,6 @@ class TestIngredient(TestModel):
     
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s
+
+def db_is_sqlite():
+    return settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3'
