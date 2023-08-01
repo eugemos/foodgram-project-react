@@ -174,11 +174,6 @@ class TestIngredient(TestModel):
         data.update(**kwargs)
         return data
 
-
-
-
-def get_model_pk_set(model):
-    return set(instance.pk for instance in model.objects.all())
     
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s

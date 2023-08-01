@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 
-from core.tests.base import left_extend_str, get_model_pk_set
+from core.tests.base import left_extend_str
 from .base import UserEndpointTestCase 
 
 
@@ -130,25 +130,25 @@ class UserCreateTestCase(UserEndpointTestCase):
         self.check_create_reqest_fails(request_data, exp_response_data)
 
     def check_create_reqest_ok(self, request_data, exp_response_data):
-        initial_model_pk_set = get_model_pk_set(self.Model)
+        initial_pk_set = self.get_pk_set()
         # Act, Assert on response
         response_data = self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_201_CREATED)
         # Assert on DB
-        result_model_pk_set = get_model_pk_set(self.Model)
-        self.assertTrue(initial_model_pk_set <= result_model_pk_set)
-        new_model_pks = tuple(result_model_pk_set - initial_model_pk_set)
-        self.assertEqual(len(new_model_pks), 1)
-        instance = self.Model.objects.get(pk=new_model_pks[0])
+        result_pk_set = self.get_pk_set()
+        self.assertTrue(initial_pk_set <= result_pk_set)
+        new_pks = tuple(result_pk_set - initial_pk_set)
+        self.assertEqual(len(new_pks), 1)
+        instance = self.Model.objects.get(pk=new_pks[0])
         self.assertEqual(self.get_instance_data(instance), response_data)
         self.assertTrue(instance.check_password(request_data['password']))
 
     def check_create_reqest_fails(self, request_data, exp_response_data):
-        initial_model_pk_set = get_model_pk_set(self.Model)
+        initial_pk_set = self.get_pk_set()
         # Act, Assert on response
         self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_400_BAD_REQUEST)
         # Assert on DB
-        result_model_pk_set = get_model_pk_set(self.Model)
-        self.assertEqual(initial_model_pk_set, result_model_pk_set)
+        result_pk_set = self.get_pk_set()
+        self.assertEqual(initial_pk_set, result_pk_set)
 
     def do_request_and_check_response(self, request_data, exp_response_data, exp_status):
         return super().do_request_and_check_response(
