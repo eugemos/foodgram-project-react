@@ -2,10 +2,10 @@ import django_filters.rest_framework as dj_filters
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Tag, Ingredient, Receipe
-from .serializers import TagSerializer, IngredientSerializer, ReceipeSerializer
+from .models import Tag, Ingredient, Recipe
+from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
 from .filters import IngredientFilterSet
-from .permissions import ReceipesPermission
+from .permissions import RecipesPermission
 
 class TagViewSet(ReadOnlyModelViewSet):
     """
@@ -27,13 +27,13 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     filterset_class = IngredientFilterSet
 
 
-class ReceipeViewSet(ModelViewSet):
+class RecipeViewSet(ModelViewSet):
     """
     ViewSet for viewing receipes.
     """
-    queryset = Receipe.objects.all()
-    serializer_class = ReceipeSerializer
-    permission_classes = (ReceipesPermission,)
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    permission_classes = (RecipesPermission,)
     # filter_backends = (dj_filters.DjangoFilterBackend,)
     # filterset_class = IngredientFilterSet
 

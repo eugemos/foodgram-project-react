@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Tag, Ingredient, Receipe, IngredientOccurence
+from .models import Tag, Ingredient, Recipe, IngredientOccurence
 
 
 @admin.register(Tag)
@@ -13,5 +13,5 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
-admin.site.register(Receipe)
+admin.site.register(Recipe)
 admin.site.register(IngredientOccurence)

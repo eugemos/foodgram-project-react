@@ -1,9 +1,9 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class ReceipesPermission(BasePermission):
+class RecipesPermission(BasePermission):
     """
-    Управляет доступом к ресурсу RECEIPES. Разрешает использовать:
+    Управляет доступом к ресурсу RECIPES. Разрешает использовать:
     - безопасные методы - любому пользователю;
     - POST - авторизованному пользователю;
     - остальные методы - владельцу объекта.

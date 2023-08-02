@@ -2,13 +2,13 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from users.views import GetTokenView
-from .views import TagViewSet, IngredientViewSet, ReceipeViewSet
+from .views import TagViewSet, IngredientViewSet, RecipeViewSet
 
 
 router = DefaultRouter()
 router.register('tags', TagViewSet)
 router.register('ingredients', IngredientViewSet)
-router.register('receipes', ReceipeViewSet)
+router.register('recipes', RecipeViewSet)
 
 urlpatterns = [
     path('', include('djoser.urls')),

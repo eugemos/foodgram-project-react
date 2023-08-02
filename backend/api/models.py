@@ -34,7 +34,7 @@ class Ingredient(models.Model):
         return f'{self.name}'
 
 
-class Receipe(models.Model):
+class Recipe(models.Model):
     name = models.CharField('Название', max_length=150)
     text = models.TextField('Описание')
     # image =
@@ -43,17 +43,17 @@ class Receipe(models.Model):
     author = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
-        related_name='receipes',
+        related_name='recipes',
         verbose_name='Автор',
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='receipes',
+        related_name='recipes',
         verbose_name='Теги',
     )
     # ingredients = models.ManyToManyField(
     #     Ingredient,
-    #     related_name='receipes',
+    #     related_name='recipes',
     #     verbose_name='Ингредиенты',
     #     through='IngredientOccurence',
     # )
@@ -72,11 +72,11 @@ class IngredientOccurence(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.PROTECT,
-        related_name='receipes',
+        related_name='recipes',
         verbose_name='Ингредиент',
     )
-    receipe = models.ForeignKey(
-        Receipe,
+    recipe = models.ForeignKey(
+        Recipe,
         on_delete=models.CASCADE,
         related_name='ingredients',
         verbose_name='Рецепт',
@@ -88,4 +88,4 @@ class IngredientOccurence(models.Model):
         verbose_name_plural = 'использования ингредиентов'
 
     def __str__(self):
-        return f'{self.ingredient} --> {self.receipe}'
+        return f'{self.ingredient} --> {self.recipe}'

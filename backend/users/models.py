@@ -17,7 +17,7 @@ class User(AbstractUser):
     first_name = models.CharField(_('first name'), max_length=150)
     last_name = models.CharField(_('last name'), max_length=150)
     favorites = models.ManyToManyField(
-        'api.Receipe',
+        'api.Recipe',
         related_name='in_favore',
         verbose_name='Избранные рецепты',
     )
