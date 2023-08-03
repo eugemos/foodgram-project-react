@@ -9,7 +9,7 @@ BASE64_PREFIX = 'data:image/png;base64,'
 TEST_DATA_ROOT = settings.BASE_DIR / 'test'
 
 class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
-    BASE_URL = '/api/recipe/'
+    BASE_URL = '/api/recipes/'
 
 
 def load_file_as_base64_str(file_name):
