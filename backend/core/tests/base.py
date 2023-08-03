@@ -25,7 +25,8 @@ class EndpointTestCase(APITestCase):
 
         # print(f'\n{self.response.content}\n')
         response_data = self.response.json()
-        self.assertEqual(response_data, exp_response_data)
+        with self.subTest():
+            self.assertEqual(response_data, exp_response_data)
         return response_data        
 
 
