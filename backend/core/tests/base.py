@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from api.models import Tag, Ingredient
+from api.models import Tag, Ingredient, Recipe
 
 
 TEST_HOST = 'http://testserver'
@@ -176,6 +176,25 @@ class TestIngredient(TestModel):
         data.update(**kwargs)
         return data
 
+
+class TestRecipe(TestModel):
+    Model = Recipe
+    INSTANCE_FIELDS = (
+        'id', 'name', 'image', 'text', 'cooking_time'
+    )
+
+    @classmethod
+    def create_data(cls, *, n='test', **kwargs):
+        n = int(n)
+        data = dict(
+            # author=author,
+            name=f'recipe_{n}',
+            text=f'rext_{n}',
+            cooking_time=n,
+            # image=None
+        )
+        data.update(**kwargs)
+        return data
     
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s
