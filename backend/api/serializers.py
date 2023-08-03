@@ -43,24 +43,24 @@ class RecipeSerializer(serializers.ModelSerializer):
         for occurence in ingredients:
             IngredientOccurence.objects.create(
                 ingredient=occurence['ingredient'],
-                receipe=receipe,
+                recipe=recipe,
                 amount=occurence['amount']
             )
 
-        return receipe
+        return recipe
 
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        receipe = Receipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data)
         instance = super().update(instance, validated_data)
-        receipe.tags.set(tags)
+        recipe.tags.set(tags)
         # instance.ingredients.clear()
-        IngredientOccurence.objects.filter(receipe=instance).delete()
+        IngredientOccurence.objects.filter(recipe=instance).delete()
         for occurence in ingredients:
             IngredientOccurence.objects.create(
                 ingredient=occurence['ingredient'],
-                receipe=receipe,
+                recipe=receipe,
                 amount=occurence['amount']
             )
 
