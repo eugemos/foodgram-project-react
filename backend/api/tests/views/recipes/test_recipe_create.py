@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework.test import APIClient
 
 from api.models import Tag, Ingredient
 from core.tests.base import (
@@ -28,6 +29,11 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         TestIngredient.create_instances(range(1, cls.FIXTURE_INGREDIENT_COUNT+1))
         cls.client_user = TestUser.create_instance(TestUser.create_data(n='client'))
 
+    def setUp(self):
+        super().setUp()
+        self.auth_client = APIClient()
+        self.auth_client.force_authenticate(user=self.client_user)
+
     def test_auth_user_can_create_recipe(self):
         tag_ids = range(1, self.FIXTURE_TAG_COUNT)
         ingredient_ids = range(1, self.FIXTURE_INGREDIENT_COUNT)
@@ -55,13 +61,15 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             image='XXX'
         )
         assert set(exp_response_data.keys()) == set(OUTPUT_FIELDS)
-        self.do_auth_request_and_check_response(request_data, (), status.HTTP_200_OK)
+        with self.subTest():
+            self.do_auth_request_and_check_response(request_data, (), status.HTTP_201_CREATED)
+        # print(f'\n{self.response.json()}\n')
 
     def do_auth_request_and_check_response(
         self, request_data, exp_response_data, exp_status
     ):
         return self.do_request_and_check_response(
-            self.client, request_data, exp_response_data, exp_status
+            self.auth_client, request_data, exp_response_data, exp_status
         )
 
     def do_request_and_check_response(
