@@ -2,7 +2,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from api.models import Tag, Ingredient
-from core.tests.base import (
+from tests.base import (
     TestTag, TestIngredient, TestUser
 )
 from .base import (

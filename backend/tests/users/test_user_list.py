@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.conf import settings
 from rest_framework import status
 
-from core.tests.base import TEST_HOST
+from tests.base import TEST_HOST
 from .base import UserEndpointTestCase
 
 

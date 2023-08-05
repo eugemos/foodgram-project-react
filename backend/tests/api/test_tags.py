@@ -1,4 +1,4 @@
-from core.tests.base import (
+from tests.base import (
     EndpointTestCase, TestSimpleListMixin, TestSimpleDetailMixin, TestTag
 )
 

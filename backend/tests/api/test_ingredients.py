@@ -1,7 +1,7 @@
 import unittest
 
 from rest_framework import status
-from core.tests.base import (
+from tests.base import (
     EndpointTestCase, TestSimpleListMixin, TestSimpleDetailMixin,
     TestIngredient, db_is_sqlite
 )

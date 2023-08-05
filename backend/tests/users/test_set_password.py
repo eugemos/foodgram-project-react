@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.tests.base import left_extend_str
+from tests.base import left_extend_str
 from .base import UserEndpointTestCase 
 
 

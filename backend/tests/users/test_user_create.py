@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from rest_framework import status
 
-from core.tests.base import left_extend_str
+from tests.base import left_extend_str
 from .base import UserEndpointTestCase 
 
 

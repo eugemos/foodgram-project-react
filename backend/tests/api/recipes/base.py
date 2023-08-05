@@ -2,11 +2,11 @@ from base64 import b64encode
 
 from django.conf import settings
 
-from core.tests.base import EndpointTestCase, TestRecipe
+from tests.base import EndpointTestCase, TestRecipe
 
 
 BASE64_PREFIX = 'data:image/png;base64,'
-TEST_DATA_ROOT = settings.BASE_DIR / 'test'
+TEST_DATA_ROOT = settings.BASE_DIR / 'tests' / 'data'
 
 class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
     BASE_URL = '/api/recipes/'

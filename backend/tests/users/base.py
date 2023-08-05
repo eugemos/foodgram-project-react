@@ -1,4 +1,4 @@
-from core.tests.base import EndpointTestCase, TestUser
+from tests.base import EndpointTestCase, TestUser
 
 
 class UserEndpointTestCase(EndpointTestCase, TestUser):
