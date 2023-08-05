@@ -120,6 +120,13 @@ class TestModel:
     def get_pk_set(cls):
         return set(instance.pk for instance in cls.Model.objects.all())
 
+    def check_only_instance_created(self, initial_pk_set):
+        result_pk_set = self.get_pk_set()
+        self.assertTrue(initial_pk_set <= result_pk_set)
+        new_pks = tuple(result_pk_set - initial_pk_set)
+        self.assertEqual(len(new_pks), 1)
+        return self.Model.objects.get(pk=new_pks[0])
+
 
 class TestUser(TestModel):
     Model = get_user_model()

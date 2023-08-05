@@ -134,14 +134,10 @@ class UserCreateTestCase(UserEndpointTestCase):
         # Act, Assert on response
         response_data = self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_201_CREATED)
         # Assert on DB
-        result_pk_set = self.get_pk_set()
-        self.assertTrue(initial_pk_set <= result_pk_set)
-        new_pks = tuple(result_pk_set - initial_pk_set)
-        self.assertEqual(len(new_pks), 1)
-        instance = self.Model.objects.get(pk=new_pks[0])
+        instance = self.check_only_instance_created(initial_pk_set)
         self.assertEqual(self.get_instance_data(instance), response_data)
         self.assertTrue(instance.check_password(request_data['password']))
-
+    
     def check_create_reqest_fails(self, request_data, exp_response_data):
         initial_pk_set = self.get_pk_set()
         # Act, Assert on response
