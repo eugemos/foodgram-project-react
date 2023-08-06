@@ -11,11 +11,15 @@ TEST_HOST = 'http://testserver'
 
 class EndpointTestCase(APITestCase):
     UNAUTHORIZED_ERROR_MESSAGE = 'Учетные данные не были предоставлены.'
+    PAGE_NOT_FOUND_ERROR_MESSAGE = 'Страница не найдена.'
     FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
     NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
     NULL_LIST_DISALLOWED_ERROR_MESSAGE = 'Этот список не может быть пустым.'
     TOO_LONG_VALUE_ERROR_MESSAGE_TEMPLATE = (
         'Убедитесь, что это значение содержит не более {} символов.'
+    )
+    TOO_SMALL_VALUE_ERROR_MESSAGE_TEMPLATE = (
+        'Убедитесь, что это значение больше либо равно {}.'
     )
     UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
 

@@ -1,4 +1,5 @@
 import re
+import unittest
 
 from django.conf import settings
 from rest_framework import status
@@ -77,7 +78,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         for field in self.REQUIRED_FIELDS:
             with self.subTest(what=f'Реакция на отсутствие поля {field}'):
                 error_message = (
-                    'Ни одного файла не было отправлено.' 
+                    'Ни одного файла не было отправлено.'
                     if field == 'image' 
                     else self.FIELD_REQUIRED_ERROR_MESSAGE
                 )
@@ -98,6 +99,46 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             [], 
             self.NULL_LIST_DISALLOWED_ERROR_MESSAGE,
             non_field_error=True
+        )
+
+    @unittest.skip('Надо разобраться с соощением об ошибке')
+    def test_request_with_nonexistent_ingredient_fails(self):
+        print('\nBEGIN\n')
+        request_data = self.create_request_data()
+        request_data.update(
+            ingredients=[dict(id=self.FIXTURE_INGREDIENT_COUNT+1, amount=1)]
+        )
+        exp_response_data = {}
+        self.check_auth_reqest_fails(
+            request_data, exp_response_data, status.HTTP_404_NOT_FOUND
+        )
+
+    def test_request_with_invalid_amount_of_ingredient_fails(self):
+        min_amount = 1
+        request_data = self.create_request_data()
+        request_data.update(
+            ingredients=[dict(id=1, amount=min_amount-1)]
+        )
+        error_message = (
+            self.TOO_SMALL_VALUE_ERROR_MESSAGE_TEMPLATE.format(min_amount)
+        )
+        exp_response_data = {
+            'ingredients': [
+                {'amount': [error_message]}
+            ]
+        }
+        self.check_auth_reqest_fails(request_data, exp_response_data)
+
+    @unittest.skip('Надо разобраться с соощением об ошибке')
+    def test_request_with_nonexistent_tag_fails(self):
+        print('\nBEGIN\n')
+        request_data = self.create_request_data()
+        request_data.update(
+            tags=[self.FIXTURE_TAG_COUNT + 1]
+        )
+        exp_response_data = {}
+        self.check_auth_reqest_fails(
+            request_data, exp_response_data, status.HTTP_404_NOT_FOUND
         )
 
     def test_request_with_empty_tags_fails(self):
@@ -131,8 +172,8 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         min_value = self.MIN_VALUES['cooking_time']
         self.check_request_with_invalid_param_fails(
             'cooking_time', 
-            min_value - 1, 
-            f'Убедитесь, что это значение больше либо равно {min_value}.'
+            min_value - 1,
+            self.TOO_SMALL_VALUE_ERROR_MESSAGE_TEMPLATE.format(min_value)
         )
 
     def subtest_auth_user_can_create_recipe(self, n):
@@ -216,11 +257,14 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         assert set(exp_response_data.keys()) == set(OUTPUT_FIELDS)
         return exp_response_data
 
-    def check_auth_reqest_fails(self, request_data, exp_response_data):
+    def check_auth_reqest_fails(
+        self, request_data, exp_response_data, 
+        exp_status=status.HTTP_400_BAD_REQUEST
+    ):
         initial_pk_set = self.get_pk_set()
         # Act, Assert on response
         self.do_auth_request_and_check_response(
-            request_data, exp_response_data, status.HTTP_400_BAD_REQUEST
+            request_data, exp_response_data, exp_status
         )
         # Assert on DB
         result_pk_set = self.get_pk_set()

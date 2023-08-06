@@ -53,6 +53,9 @@ class IngredientOccurenceSerialiser(serializers.ModelSerializer):
     class Meta:
         model = IngredientOccurence
         fields = ('id', 'amount', 'measurement_unit', 'name')
+        extra_kwargs = {
+            'amount': {'min_value': 1},
+        }
 
 
 class TagField(serializers.PrimaryKeyRelatedField):
@@ -88,7 +91,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         extra_kwargs = {
             'cooking_time': {'min_value': 1},
-            # 'author': {'read_only': True},
         }
 
     def get_is_favorited(self, recipe):
