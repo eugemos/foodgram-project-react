@@ -21,6 +21,12 @@ class User(AbstractUser):
         related_name='in_favore',
         verbose_name='Избранные рецепты',
     )
+    shopping_cart = models.ManyToManyField(
+        'api.Recipe',
+        db_table='ShoppingCart',
+        related_name='in_shopping_cart',
+        verbose_name='Список покупок',
+    )
     subscribed_to=models.ManyToManyField(
         'self',
         related_name='subscribers',
@@ -47,3 +53,9 @@ class User(AbstractUser):
 
     def set_subscriptions(self, users):
         self.subscribed_to.set(users)
+
+    def has_in_favore(self, recipe):
+        return recipe in self.favorites.all()
+
+    def has_in_shopping_cart(self, recipe):
+        return recipe in self.shopping_cart.all()
