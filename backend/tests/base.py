@@ -188,7 +188,8 @@ class TestIngredient(TestModel):
 class TestRecipe(TestModel):
     Model = Recipe
     INSTANCE_FIELDS = (
-        'id', 'name', 'image', 'text', 'cooking_time'
+        'id', 'name', 'text', 'cooking_time', #'image',
+        'author', 'tag_ids', 'ingredient_occurences'
     )
 
     @classmethod
