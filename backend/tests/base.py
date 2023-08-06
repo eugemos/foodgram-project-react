@@ -10,6 +10,8 @@ TEST_HOST = 'http://testserver'
 
 
 class EndpointTestCase(APITestCase):
+    UNAUTHORIZED_ERROR_MESSAGE = 'Учетные данные не были предоставлены.'
+    UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
 
     def do_request_and_check_response(
         self, client, method, url, request_data, 

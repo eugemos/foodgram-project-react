@@ -35,7 +35,7 @@ class UserProfileTestCase(UserEndpointTestCase):
         )
 
     def test_anonymous_request_fails(self):
-        exp_response_data = dict(detail='Учетные данные не были предоставлены.')
+        exp_response_data = self.UNAUTHORIZED_ERROR_RESPONSE_DATA
         for id in (self.client_user.id, self.UNEXISTENT_USER_ID):
             with self.subTest(id=id):
                 self.do_anon_request_and_check_response(

@@ -19,7 +19,7 @@ class UserProfileTestCase(UserEndpointTestCase):
         self.auth_client.force_authenticate(user=self.client_user)
 
     def test_anonymous_request_fails(self):
-        exp_response_data = dict(detail='Учетные данные не были предоставлены.')
+        exp_response_data = self.UNAUTHORIZED_ERROR_RESPONSE_DATA
         self.do_anon_request_and_check_response(
             exp_response_data, status.HTTP_401_UNAUTHORIZED
         )
