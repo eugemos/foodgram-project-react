@@ -19,9 +19,6 @@ class Base64ImageField(serializers.FileField):
                 b64decode(imgstr), 
                 name=f'{self.file_name_base}.{ext}'
             )
-            print('\nIMAGE\n')
-        else:
-            print('\nNO IMAGE\n')
 
         return super().to_internal_value(data)
 
@@ -71,9 +68,9 @@ class TagField(serializers.PrimaryKeyRelatedField):
         return super().to_representation(instance)
 
 class RecipeSerializer(serializers.ModelSerializer):
-    image = RecipeImageField(required=False, allow_null=True)
+    image = RecipeImageField(required=True)
     tags = TagField(
-        required=True, many=True, allow_empty=True, queryset=Tag.objects.all()
+        required=True, many=True, allow_empty=False, queryset=Tag.objects.all()
     )
     ingredients = IngredientOccurenceSerialiser(
         required=True, many=True, allow_empty=False
@@ -90,7 +87,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_favorited', 'is_in_shopping_cart'
         )
         extra_kwargs = {
-            # 'tags': {'allow_empty': True},
+            'cooking_time': {'min_value': 1},
             # 'author': {'read_only': True},
         }
 

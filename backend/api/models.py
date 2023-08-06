@@ -35,11 +35,12 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    name = models.CharField('Название', max_length=150)
+    name = models.CharField('Название', max_length=200)
     text = models.TextField('Описание')
     image = models.FileField('Картинка', upload_to='recipe')
     cooking_time = models.PositiveSmallIntegerField(
-        'Время приготовления, мин.')
+        'Время приготовления, мин.'
+    )
     author = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
