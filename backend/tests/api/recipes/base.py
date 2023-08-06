@@ -14,4 +14,4 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
 
 def load_file_as_base64_str(file_name):
         with open(TEST_DATA_ROOT / file_name, 'rb') as f:
-            return BASE64_PREFIX + str(b64encode(f.read()))
+            return BASE64_PREFIX + b64encode(f.read()).decode()
