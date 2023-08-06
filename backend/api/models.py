@@ -57,6 +57,16 @@ class Recipe(models.Model):
     #     verbose_name='Ингредиенты',
     #     through='IngredientOccurence',
     # )
+    @property
+    def tag_ids(self):
+        return [tag.id for tag in self.tags.all()]
+
+    @property
+    def ingredient_occurences(self):
+        return [
+            dict(id=i.ingredient.id, amount=i.amount) 
+            for i in self.ingredients.all()
+        ]
 
     class Meta:
         ordering = ['name']
