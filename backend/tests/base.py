@@ -11,6 +11,12 @@ TEST_HOST = 'http://testserver'
 
 class EndpointTestCase(APITestCase):
     UNAUTHORIZED_ERROR_MESSAGE = 'Учетные данные не были предоставлены.'
+    FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
+    NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
+    NULL_LIST_DISALLOWED_ERROR_MESSAGE = 'Этот список не может быть пустым.'
+    TOO_LONG_VALUE_ERROR_MESSAGE_TEMPLATE = (
+        'Убедитесь, что это значение содержит не более {} символов.'
+    )
     UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
 
     def do_request_and_check_response(
@@ -20,7 +26,7 @@ class EndpointTestCase(APITestCase):
         func = getattr(client, method)
         self.response = func(url, request_data, format='json', **kwargs)
         with self.subTest():
-            self.assertEqual(self.response.status_code, exp_status)
+            self.assertEqual(exp_status, self.response.status_code)
         
         if exp_response_data == ():
             return None
@@ -28,7 +34,7 @@ class EndpointTestCase(APITestCase):
         # print(f'\n{self.response.content}\n')
         response_data = self.response.json()
         with self.subTest():
-            self.assertEqual(response_data, exp_response_data)
+            self.assertEqual(exp_response_data, response_data)
         return response_data        
 
 
