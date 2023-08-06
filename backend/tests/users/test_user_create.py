@@ -46,13 +46,17 @@ class UserCreateTestCase(UserEndpointTestCase):
 
     def test_request_without_required_param_fails(self):
         for field in self.REQUIRED_FIELDS:
-            with self.subTest(what=f'Проверка реакции на отсутствие поля {field}'):
+            with self.subTest(what=f'Реакция на отсутствие поля {field}'):
                 self.subtest_request_without_required_param_fails(field)
 
     def test_request_with_too_long_param_fails(self):
         for field, max_length in self.MAX_LENGTHS.items():
-            with self.subTest(f'Проверка реакции на слишком длинное значение поля {field}'):
-                self.subtest_request_with_too_long_param_fails(field, max_length)
+            with self.subTest(
+                what=f'Реакция на слишком длинное значение поля {field}'
+            ):
+                self.subtest_request_with_too_long_param_fails(
+                    field, max_length
+                )
 
     def test_request_with_non_unique_username_fails(self):
         self.check_request_with_non_unique_param_fails('username')
@@ -73,7 +77,7 @@ class UserCreateTestCase(UserEndpointTestCase):
         self.check_request_with_invalid_param_fails(
             'password', 
             'q'*8, 
-            'Введённый пароль слишком широко распространён.'
+            self.TOO_WIDESPREAD_PASSWORD_ERROR_MESSAGE
         )
 
     def test_request_with_invalid_email_fails(self):
@@ -94,7 +98,7 @@ class UserCreateTestCase(UserEndpointTestCase):
     def subtest_request_without_required_param_fails(self, field_name):
         request_data = self.create_data(n='other', password='ZZaaqq11')
         del request_data[field_name]
-        exp_response_data = {field_name: ['Обязательное поле.']}
+        exp_response_data = {field_name: [self.FIELD_REQUIRED_ERROR_MESSAGE]}
         self.check_create_reqest_fails(request_data, exp_response_data)
 
     def subtest_request_with_too_long_param_fails(self, field_name, limit):
@@ -102,7 +106,7 @@ class UserCreateTestCase(UserEndpointTestCase):
         self.check_request_with_invalid_param_fails(
             field_name,
             left_extend_str(sample_data[field_name], limit + 1),
-            f'Убедитесь, что это значение содержит не более {limit} символов.'
+            self.TOO_LONG_VALUE_ERROR_MESSAGE_TEMPLATE.format(limit)
         )
 
     def check_request_with_non_unique_param_fails(self, field_name):
@@ -123,7 +127,9 @@ class UserCreateTestCase(UserEndpointTestCase):
 
         self.check_create_reqest_ok(request_data, exp_response_data)
 
-    def check_request_with_invalid_param_fails(self, field_name, field_value, error_msg):
+    def check_request_with_invalid_param_fails(
+        self, field_name, field_value, error_msg
+    ):
         request_data = self.create_data(n='other', password='ZZaaqq22')
         request_data[field_name] = field_value
         exp_response_data = {field_name: [error_msg]}
@@ -132,7 +138,9 @@ class UserCreateTestCase(UserEndpointTestCase):
     def check_create_reqest_ok(self, request_data, exp_response_data):
         initial_pk_set = self.get_pk_set()
         # Act, Assert on response
-        response_data = self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_201_CREATED)
+        response_data = self.do_request_and_check_response(
+            request_data, exp_response_data, status.HTTP_201_CREATED
+        )
         # Assert on DB
         instance = self.check_only_instance_created(initial_pk_set)
         self.assertEqual(self.get_instance_data(instance), response_data)
@@ -141,12 +149,16 @@ class UserCreateTestCase(UserEndpointTestCase):
     def check_create_reqest_fails(self, request_data, exp_response_data):
         initial_pk_set = self.get_pk_set()
         # Act, Assert on response
-        self.do_request_and_check_response(request_data, exp_response_data, status.HTTP_400_BAD_REQUEST)
+        self.do_request_and_check_response(
+            request_data, exp_response_data, status.HTTP_400_BAD_REQUEST
+        )
         # Assert on DB
         result_pk_set = self.get_pk_set()
         self.assertEqual(initial_pk_set, result_pk_set)
 
-    def do_request_and_check_response(self, request_data, exp_response_data, exp_status):
+    def do_request_and_check_response(
+        self, request_data, exp_response_data, exp_status
+    ):
         return super().do_request_and_check_response(
             self.client, 
             'post', 

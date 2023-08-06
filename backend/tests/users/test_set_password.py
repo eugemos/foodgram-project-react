@@ -47,16 +47,17 @@ class SetPasswordTestCase(UserEndpointTestCase):
     def test_request_with_too_long_new_password_fails(self):
         self.check_request_with_invalid_param_fails(
             'new_password', 
-            self.NEW_PASSWORD + 'q', 
-            'Убедитесь, что это значение содержит не более '
-            f'{self.MAX_PASSWORD_LENGTH} символов.'
+            self.NEW_PASSWORD + 'q',
+            self.TOO_LONG_VALUE_ERROR_MESSAGE_TEMPLATE.format(
+                self.MAX_PASSWORD_LENGTH
+            )
         )
 
     def test_request_with_too_weak_new_password_fails(self):
         self.check_request_with_invalid_param_fails(
             'new_password', 
             'q'*8, 
-            'Введённый пароль слишком широко распространён.'
+            self.TOO_WIDESPREAD_PASSWORD_ERROR_MESSAGE
         )
 
     def test_request_without_current_password_fails(self):
@@ -76,7 +77,9 @@ class SetPasswordTestCase(UserEndpointTestCase):
     def check_request_without_required_param_fails(self, field_name):
         request_data = self.REQUEST_DATA.copy()
         del request_data[field_name]
-        exp_response_data = {field_name: ['Обязательное поле.']}
+        exp_response_data = {
+            field_name: [self.FIELD_REQUIRED_ERROR_MESSAGE]
+        }
         self.check_request_fails(request_data, exp_response_data)
 
     def check_request_fails(self, request_data, exp_response_data):

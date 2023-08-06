@@ -15,6 +15,9 @@ class EndpointTestCase(APITestCase):
     FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
     NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
     NULL_LIST_DISALLOWED_ERROR_MESSAGE = 'Этот список не может быть пустым.'
+    TOO_WIDESPREAD_PASSWORD_ERROR_MESSAGE = (
+        'Введённый пароль слишком широко распространён.'
+    )
     TOO_LONG_VALUE_ERROR_MESSAGE_TEMPLATE = (
         'Убедитесь, что это значение содержит не более {} символов.'
     )
@@ -22,6 +25,7 @@ class EndpointTestCase(APITestCase):
         'Убедитесь, что это значение больше либо равно {}.'
     )
     UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
+    PAGE_NOT_FOUND_RESPONSE_DATA = dict(detail=PAGE_NOT_FOUND_ERROR_MESSAGE)
 
     def do_request_and_check_response(
         self, client, method, url, request_data, 
@@ -88,7 +92,7 @@ class TestSimpleDetailMixin:
     def test_anon_request_to_unexistent_tag_fails(self):
         for id in (0, self.INSTANCE_COUNT + 1):
             with self.subTest(id=id):
-                exp_response_data = {'detail': 'Страница не найдена.'}
+                exp_response_data = self.PAGE_NOT_FOUND_RESPONSE_DATA
                 self.do_anon_request_and_check_response(
                     id, exp_response_data, status.HTTP_404_NOT_FOUND
                 )

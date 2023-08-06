@@ -35,7 +35,12 @@ class UserListTestCase(UserEndpointTestCase):
 
     def test_list_action_without_params_authenticated(self):
         page_size = DEFAULT_PAGE_SIZE
-        self.prepare(instance_count=page_size, page_size=page_size, client_user_id=1, subscriptions={1: (2,4,6)})
+        self.prepare(
+            instance_count=page_size, 
+            page_size=page_size, 
+            client_user_id=1, 
+            subscriptions={1: (2,4,6)}
+        )
         self.perform_test(1)
 
     def test_list_action_without_params_1(self):
@@ -81,7 +86,9 @@ class UserListTestCase(UserEndpointTestCase):
             
     def perform_test(self, page, params=dict()):
         # Act
-        self.response = self.client.get(self.BASE_URL, params, format='json', follow=True)
+        self.response = self.client.get(
+            self.BASE_URL, params, format='json', follow=True
+        )
         # Assert
         self.assertEqual(self.response.status_code, status.HTTP_200_OK)
         self.check_paginator_output(

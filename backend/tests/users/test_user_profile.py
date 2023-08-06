@@ -27,7 +27,7 @@ class UserProfileTestCase(UserEndpointTestCase):
         self.auth_client.force_authenticate(user=self.client_user)
 
     def test_request_to_unexistent_user_fails(self):
-        exp_response_data = dict(detail='Страница не найдена.')
+        exp_response_data = self.PAGE_NOT_FOUND_RESPONSE_DATA
         self.do_auth_request_and_check_response(
             self.UNEXISTENT_USER_ID,
             exp_response_data,
