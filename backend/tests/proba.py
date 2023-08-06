@@ -2,7 +2,7 @@ from base64 import b64encode, b64decode
 
 from django.core.files import File 
 from django.core.files.base import ContentFile 
-from core.tests.base import TestRecipe, TestUser
+from tests.base import TestRecipe, TestUser
 
 
 def load_file_as_base64_bytes(file_name):
