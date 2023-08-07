@@ -211,7 +211,7 @@ class TestRecipe(TestModel):
     )
 
     @classmethod
-    def create_data(cls, *, n='test', **kwargs):
+    def create_data(cls, *, n=1, **kwargs):
         n = int(n)
         data = dict(
             # author=author,
