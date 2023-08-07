@@ -117,7 +117,11 @@ class TestModel:
         return data
 
     @classmethod
-    def create_instance(cls, data, **kwargs):
+    def do_create_instance(cls, data):
+        return cls.Model.objects.create(**data)
+
+    @classmethod
+    def create_instance(cls, data=None, **kwargs):
         if not isinstance(data, dict):
             if data is None:
                 data = cls.create_data()
@@ -125,12 +129,11 @@ class TestModel:
                 data = cls.create_data(n=data)
 
         data.update(**kwargs)
-        return cls.Model.objects.create(**data)
+        return cls.do_create_instance(data)
 
     @classmethod
     def create_instances(cls, data_seq):
-        for data in data_seq:
-            cls.create_instance(data)
+        return tuple(cls.create_instance(data) for data in data_seq)
 
     @classmethod
     def get_pk_set(cls):
@@ -151,8 +154,7 @@ class TestUser(TestModel):
     )
 
     @classmethod
-    def create_instance(cls, data, **kwargs):
-        data.update(**kwargs)
+    def do_create_instance(cls, data):
         return cls.Model.objects.create_user(**data)
 
     @classmethod
