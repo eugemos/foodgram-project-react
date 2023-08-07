@@ -77,6 +77,14 @@ class Recipe(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+    def add_ingredient(self, ingredient, amount):
+        IngredientOccurence.objects.create(
+            recipe=self, ingredient=ingredient, amount=amount
+        )
+
+    def set_tags(self, tags):
+        self.tags.set(tags)
+
 
 class IngredientOccurence(models.Model):
     amount = models.PositiveSmallIntegerField('Количество')

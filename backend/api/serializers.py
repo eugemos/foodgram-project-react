@@ -105,14 +105,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
-
+        recipe.set_tags(tags)
         for occurence in ingredients:
-            IngredientOccurence.objects.create(
-                ingredient=occurence['ingredient'],
-                recipe=recipe,
-                amount=occurence['amount']
-            )
+            recipe.add_ingredient(occurence['ingredient'], occurence['amount'])
 
         return recipe
 
