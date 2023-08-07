@@ -15,14 +15,6 @@ from .base import (
     load_file_as_base64_str,
 )
 
-INPUT_FIELDS = (
-    'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
-)
-OUTPUT_FIELDS = (
-    'id', 'tags', 'author', 'ingredients', 'is_favorited', 
-    'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
-)
-
 class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
@@ -225,7 +217,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             image = load_file_as_base64_str('test.png'),
             **kwargs
         )
-        assert set(request_data.keys()) == set(INPUT_FIELDS)
+        assert set(request_data.keys()) == set(self.INPUT_FIELDS)
         return request_data
 
     def create_exp_instance_data(self, *, n=1, **kwargs):
@@ -254,7 +246,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             is_in_shopping_cart=False,
             image=f'{TEST_HOST}{settings.MEDIA_URL}{instance.image.name}'
         )
-        assert set(exp_response_data.keys()) == set(OUTPUT_FIELDS)
+        assert set(exp_response_data.keys()) == set(self.OUTPUT_FIELDS)
         return exp_response_data
 
     def check_auth_reqest_fails(

@@ -10,6 +10,13 @@ TEST_DATA_ROOT = settings.BASE_DIR / 'tests' / 'data'
 
 class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
     BASE_URL = '/api/recipes/'
+    INPUT_FIELDS = (
+        'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
+    )
+    OUTPUT_FIELDS = (
+        'id', 'tags', 'author', 'ingredients', 'is_favorited', 
+        'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
+    )
 
 
 def load_file_as_base64_str(file_name):
