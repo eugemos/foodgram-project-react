@@ -21,8 +21,8 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        TestTag.create_instances(cls.tag_ids)
-        TestIngredient.create_instances(cls.ingredient_ids)
+        cls.tags = TestTag.create_instances(cls.tag_ids)
+        cls.ingredients = TestIngredient.create_instances(cls.ingredient_ids)
         # cls.authors = tuple(TestUser.create_instance(n) for n in cls.author_ids)
         cls.authors = TestUser.create_instances(cls.author_ids)
         cls.client_user = TestUser.create_instance(TestUser.create_data(n='client'))
@@ -34,8 +34,11 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
             )
             for n in cls.recipe_ids
         )
-        # for recipe in recipes:
-
+        for recipe in recipes:
+            i = recipe.pk - 1
+            recipe.set_tags(cls.tags[i:i+cls.TAGS_PER_RECIPE])
+            for ingredient in cls.ingredients[i:i+cls.INGREDIENTS_PER_RECIPE]:
+                recipe.add_ingredient(ingredient, ingredient.pk)
 
     def test_fixture(self):
         self.assertEqual(self.Model.objects.count(), self.FIXTURE_RECIPE_COUNT)  
