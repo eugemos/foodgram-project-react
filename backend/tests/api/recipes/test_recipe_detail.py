@@ -27,9 +27,8 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         super().setUpClass()
         cls.tags = TestTag.create_instances(cls.tag_fids)
         cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
-        # cls.authors = tuple(TestUser.create_instance(n) for n in cls.author_ids)
         cls.author = TestUser.create_instance('author')
-        cls.client_user = TestUser.create_instance(TestUser.create_data(n='client'))
+        cls.client_user = TestUser.create_instance('client')
         cls.recipe = cls.create_instance(
             author=cls.author,
             image=File(open('tests/data/test.png'), name=f'recipe.png'),
@@ -58,7 +57,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         super().setUp()
         self.auth_client = APIClient()
         self.auth_client.force_authenticate(user=self.client_user)
-        # self.maxDiff = None
+        self.maxDiff = None
 
     def test_auth_user_can_retrieve_recipe_detail(self):
         exp_response_data = self.base_exp_response_data
@@ -67,23 +66,41 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         )
 
     def test_auth_user_can_retrieve_recipe_detail_1(self):
-        self.client_user.subscribe_to(self.author)
-        
+        self.set_bool_fields_to_true()
         exp_response_data = dict(
             self.base_exp_response_data,
             author = TestUser.create_data(
                 n='author', id=self.author.pk, is_subscribed=True
             ),
+            is_favorited=True,
+            is_in_shopping_cart=True
         )
         self.do_auth_request_and_check_response(
             self.recipe.pk, exp_response_data, status.HTTP_200_OK
         )
 
     def test_anon_user_can_retrieve_recipe_detail(self):
+        self.set_bool_fields_to_true()
         exp_response_data = self.base_exp_response_data
         self.do_anon_request_and_check_response(
             self.recipe.pk, exp_response_data, status.HTTP_200_OK
         )
+    
+    def test_request_to_unexistent_recipe_fails(self):
+        exp_response_data = self.PAGE_NOT_FOUND_RESPONSE_DATA
+        for id in (0, self.recipe.pk + 1):
+            with self.subTest(id=id):
+                self.do_anon_request_and_check_response(
+                    id, exp_response_data, status.HTTP_404_NOT_FOUND
+                )
+                self.do_auth_request_and_check_response(
+                    id, exp_response_data, status.HTTP_404_NOT_FOUND
+                )
+
+    def set_bool_fields_to_true(self):
+        self.client_user.subscribe_to(self.author)
+        self.client_user.add_to_favorites(self.recipe)
+        self.client_user.add_to_shopping_cart(self.recipe)
 
     def do_anon_request_and_check_response(
         self, id, exp_response_data, exp_status
@@ -103,8 +120,6 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         self, client, id, exp_response_data, exp_status
     ):
         return super().do_request_and_check_response(
-            client, 'get', f'{self.BASE_URL}{id}/', 
+            client, 'get', f'{self.BASE_URL}{id}/',
             None, exp_response_data, exp_status
         )
-
-
