@@ -57,5 +57,11 @@ class User(AbstractUser):
     def has_in_favore(self, recipe):
         return recipe in self.favorites.all()
 
+    def add_to_favorites(self, recipe):
+        self.favorites.add(recipe)
+
     def has_in_shopping_cart(self, recipe):
         return recipe in self.shopping_cart.all()
+
+    def add_to_shopping_cart(self, recipe):
+        self.shopping_cart.add(recipe)
