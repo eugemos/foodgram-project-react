@@ -205,10 +205,20 @@ class TestIngredient(TestModel):
 
 class TestRecipe(TestModel):
     Model = Recipe
-    INSTANCE_FIELDS = (
-        'id', 'name', 'text', 'cooking_time', #'image',
-        'author', 'tag_ids', 'ingredient_occurences'
-    )
+    INSTANCE_FIELDS = ('id', 'name', 'text', 'cooking_time', 'author')
+
+    @classmethod
+    def get_instance_data(cls, instance, **kwargs):
+        data = super().get_instance_data(
+            instance,
+            tags = [tag.id for tag in instance.tags.all()],
+            ingredients = [
+                dict(id=i.ingredient.id, amount=i.amount) 
+                for i in instance.ingredients.all()
+            ]
+        )
+        data.update(*kwargs)
+        return data
 
     @classmethod
     def create_data(cls, *, fid=1, **kwargs):

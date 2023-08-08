@@ -212,40 +212,39 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     def create_request_data(self, *, fid=1, **kwargs):
         request_data = self.create_data(
             fid=fid,
-            ingredients = [*self.ingredient_occurences_iter()],
-            tags = [*self.tag_fids],
-            image = load_file_as_base64_str('test.png'),
-            **kwargs
+            ingredients=[*self.ingredient_occurences_iter()],
+            tags=[*self.tag_fids],
+            image=load_file_as_base64_str('test.png'),
         )
+        request_data.update(**kwargs)
         assert set(request_data.keys()) == set(self.INPUT_FIELDS)
         return request_data
 
     def create_exp_instance_data(self, *, fid=1, **kwargs):
-        return self.create_data(
+        data = self.create_data(
             fid=fid,
-            author = self.client_user,
-            ingredient_occurences = [*self.ingredient_occurences_iter()],
-            tag_ids = [*self.tag_fids],
-            **kwargs
+            author=self.client_user,
+            ingredients=[*self.ingredient_occurences_iter()],
+            tags=[*self.tag_fids],
         )
+        data.update(**kwargs)
+        return data
     
     def create_exp_response_data(self, instance, *, fid=1, **kwargs):
         exp_response_data = self.create_data(
             fid=fid,
-            id = instance.pk,
-            tags = [TestTag.get_instance_data(Tag.objects.get(id=i)) for i in self.tag_fids],
-            author = TestUser.get_instance_data(self.client_user, is_subscribed=False),
-            ingredients = [
-                TestIngredient.get_instance_data(
-                    Ingredient.objects.get(id=i),
-                    amount=i
-                )
-                for i in self.ingredient_fids
+            id=instance.pk,
+            tags=[TestTag.create_data(fid=fid, id=fid) for fid in self.tag_fids],
+            author=TestUser.create_data(fid='client', id=self.client_user.id, is_subscribed=False),
+            ingredients=[
+                TestIngredient.create_data(fid=fid, id=fid, amount=fid)
+                for fid in self.ingredient_fids
             ],
             is_favorited=False,
             is_in_shopping_cart=False,
             image=f'{TEST_HOST}{settings.MEDIA_URL}{instance.image.name}'
         )
+        exp_response_data.update(**kwargs)
         assert set(exp_response_data.keys()) == set(self.OUTPUT_FIELDS)
         return exp_response_data
 
