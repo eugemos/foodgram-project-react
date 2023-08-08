@@ -224,11 +224,10 @@ class TestRecipe(TestModel):
     def create_data(cls, *, fid=1, **kwargs):
         fid = int(fid)
         data = dict(
-            # author=author,
             name=f'recipe_{fid}',
             text=f'rext_{fid}',
             cooking_time=fid,
-            # image=None
+            # author & image отсутствуют - так надо!
         )
         data.update(**kwargs)
         return data
