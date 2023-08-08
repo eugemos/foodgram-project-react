@@ -126,7 +126,7 @@ class TestModel:
             if data is None:
                 data = cls.create_data()
             else:
-                data = cls.create_data(n=data)
+                data = cls.create_data(fid=data)
 
         data.update(**kwargs)
         return cls.do_create_instance(data)
@@ -158,12 +158,12 @@ class TestUser(TestModel):
         return cls.Model.objects.create_user(**data)
 
     @classmethod
-    def create_data(cls, *, n='test', **kwargs):
+    def create_data(cls, *, fid='test', **kwargs):
         data = dict(
-            email=f'mail_{n}@email.any',
-            username=f'user_{n}',
-            first_name=f'first_name_{n}',
-            last_name=f'last_name_{n}',
+            email=f'mail_{fid}@email.any',
+            username=f'user_{fid}',
+            first_name=f'first_name_{fid}',
+            last_name=f'last_name_{fid}',
         )
         data.update(**kwargs)
         return data
@@ -175,13 +175,13 @@ class TestTag(TestModel):
     )
 
     @classmethod
-    def create_data(cls, *, n=0, **kwargs):
-        n = int(n)
-        color = format(n, '5>6x')
+    def create_data(cls, *, fid=0, **kwargs):
+        fid = int(fid)
+        color = format(fid, '5>6x')
         data = dict(
-            name=f'name_{n}',
+            name=f'name_{fid}',
             color=f'#{color}',
-            slug=f'slug_{n}',
+            slug=f'slug_{fid}',
         )
         data.update(**kwargs)
         return data
@@ -194,10 +194,10 @@ class TestIngredient(TestModel):
     NAME_PREFIX = 'No'
 
     @classmethod
-    def create_data(cls, *, n='test', **kwargs):
+    def create_data(cls, *, fid='test', **kwargs):
         data = dict(
-            name=f'{cls.NAME_PREFIX}{n}_ingredient',
-            measurement_unit=f'measure_{n}',
+            name=f'{cls.NAME_PREFIX}{fid}_ingredient',
+            measurement_unit=f'measure_{fid}',
         )
         data.update(**kwargs)
         return data
@@ -211,17 +211,18 @@ class TestRecipe(TestModel):
     )
 
     @classmethod
-    def create_data(cls, *, n=1, **kwargs):
-        n = int(n)
+    def create_data(cls, *, fid=1, **kwargs):
+        fid = int(fid)
         data = dict(
             # author=author,
-            name=f'recipe_{n}',
-            text=f'rext_{n}',
-            cooking_time=n,
+            name=f'recipe_{fid}',
+            text=f'rext_{fid}',
+            cooking_time=fid,
             # image=None
         )
         data.update(**kwargs)
         return data
+ 
     
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s

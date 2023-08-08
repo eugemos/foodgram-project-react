@@ -8,9 +8,7 @@ from .base import AuthEndpointTestCase
 class GetTokenTestCase(AuthEndpointTestCase):
     def setUp(self):
         super().setUp()
-        self.client_user = self.create_instance(
-            self.create_data()
-        )
+        self.client_user = self.create_instance()
         token = Token.objects.create(user=self.client_user)
         self.auth_client = APIClient()
         self.auth_client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)

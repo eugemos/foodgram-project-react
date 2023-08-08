@@ -6,7 +6,7 @@ class UserEndpointTestCase(EndpointTestCase, TestUser):
 
     @classmethod
     def get_data_iter(cls, iter):
-        return (cls.create_data(n=i) for i in iter)
+        return (cls.create_data(fid=i) for i in iter)
 
     def check_data_is_dict_with_proper_keys(self, data, keys):
         self.assertIsInstance(data, dict)

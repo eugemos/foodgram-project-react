@@ -13,12 +13,8 @@ class UserProfileTestCase(UserEndpointTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.client_user = cls.create_instance(
-            cls.create_data(n='client', id=cls.CLIENT_USER_ID)
-        )
-        cls.sample_user = cls.create_instance(
-            cls.create_data(n='sample', id=cls.SAMPLE_USER_ID)
-        )
+        cls.client_user = cls.create_instance('client', id=cls.CLIENT_USER_ID)
+        cls.sample_user = cls.create_instance('sample', id=cls.SAMPLE_USER_ID)
         cls.client_user.subscribe_to(cls.sample_user)
        
     def setUp(self):

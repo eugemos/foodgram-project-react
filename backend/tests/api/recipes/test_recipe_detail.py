@@ -39,12 +39,12 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
 
         cls.base_exp_response_data = cls.create_data(
             id = cls.recipe.pk,
-            tags = [TestTag.create_data(n=fid, id=fid) for fid in cls.tag_fids],
+            tags = [TestTag.create_data(fid=fid, id=fid) for fid in cls.tag_fids],
             author = TestUser.create_data(
-                n='author', id=cls.author.pk, is_subscribed=False
+                fid='author', id=cls.author.pk, is_subscribed=False
             ),
             ingredients = [
-                TestIngredient.create_data(n=fid, id=fid, amount=fid)
+                TestIngredient.create_data(fid=fid, id=fid, amount=fid)
                 for fid in cls.ingredient_fids
             ],
             is_favorited=False,
@@ -70,7 +70,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         exp_response_data = dict(
             self.base_exp_response_data,
             author = TestUser.create_data(
-                n='author', id=self.author.pk, is_subscribed=True
+                fid='author', id=self.author.pk, is_subscribed=True
             ),
             is_favorited=True,
             is_in_shopping_cart=True

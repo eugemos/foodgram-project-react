@@ -33,7 +33,8 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         super().setUpClass()
         TestTag.create_instances(cls.tag_ids)
         TestIngredient.create_instances(cls.ingredient_ids)
-        cls.client_user = TestUser.create_instance(TestUser.create_data(n='client'))
+        cls.client_user = TestUser.create_instance('client')
+        # cls.client_user = TestUser.create_instance(TestUser.create_data(fid='client'))
 
     @classmethod
     def ingredient_occurences(cls):
@@ -46,9 +47,9 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         self.maxDiff = None
 
     def test_auth_user_can_create_recipe(self):
-        for n in range(1, 3):
-            with self.subTest(n=n):
-                self.subtest_auth_user_can_create_recipe(n)
+        for fid in range(1, 3):
+            with self.subTest(fid=fid):
+                self.subtest_auth_user_can_create_recipe(fid)
 
     def test_anon_user_cant_create_recipe(self):
         initial_pk_set = self.get_pk_set()
@@ -168,9 +169,9 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             self.TOO_SMALL_VALUE_ERROR_MESSAGE_TEMPLATE.format(min_value)
         )
 
-    def subtest_auth_user_can_create_recipe(self, n):
+    def subtest_auth_user_can_create_recipe(self, fid):
         initial_pk_set = self.get_pk_set()
-        request_data = self.create_request_data(n=n)
+        request_data = self.create_request_data(fid=fid)
         with self.subTest():
             self.do_auth_request_and_check_response(
                 request_data, (), status.HTTP_201_CREATED
@@ -179,13 +180,13 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         # print(f'\n{response_data}\n')
         # Assert on DB
         instance = self.check_only_instance_created(initial_pk_set)
-        exp_instance_data = self.create_exp_instance_data(n=n, id = response_data['id'])
+        exp_instance_data = self.create_exp_instance_data(fid=fid, id = response_data['id'])
         self.assertEqual(exp_instance_data, self.get_instance_data(instance))
         self.assertTrue(re.fullmatch(
             'recipe/recipe(_[0-9a-zA-Z]{7})?.png', instance.image.name
         ))
         # Assert on Response
-        exp_response_data = self.create_exp_response_data(instance, n=n)
+        exp_response_data = self.create_exp_response_data(instance, fid=fid)
         self.assertEqual(exp_response_data, response_data)
 
     def subtest_request_without_required_param_fails(
@@ -209,9 +210,9 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         }
         self.check_auth_reqest_fails(request_data, exp_response_data)
 
-    def create_request_data(self, *, n=1, **kwargs):
+    def create_request_data(self, *, fid=1, **kwargs):
         request_data = self.create_data(
-            n=n,
+            fid=fid,
             ingredients = [*self.ingredient_occurences()],
             tags = [*self.tag_ids],
             image = load_file_as_base64_str('test.png'),
@@ -220,18 +221,18 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         assert set(request_data.keys()) == set(self.INPUT_FIELDS)
         return request_data
 
-    def create_exp_instance_data(self, *, n=1, **kwargs):
+    def create_exp_instance_data(self, *, fid=1, **kwargs):
         return self.create_data(
-            n=n,
+            fid=fid,
             author = self.client_user,
             ingredient_occurences = [*self.ingredient_occurences()],
             tag_ids = [*self.tag_ids],
             **kwargs
         )
     
-    def create_exp_response_data(self, instance, *, n=1, **kwargs):
+    def create_exp_response_data(self, instance, *, fid=1, **kwargs):
         exp_response_data = self.create_data(
-            n=n,
+            fid=fid,
             id = instance.pk,
             tags = [TestTag.get_instance_data(Tag.objects.get(id=i)) for i in self.tag_ids],
             author = TestUser.get_instance_data(self.client_user, is_subscribed=False),

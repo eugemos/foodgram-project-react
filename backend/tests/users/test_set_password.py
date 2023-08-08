@@ -17,9 +17,7 @@ class SetPasswordTestCase(UserEndpointTestCase):
        
     def setUp(self):
         super().setUp()
-        self.client_user = self.create_instance(
-            self.create_data(password=self.CURRENT_PASSWORD)
-        )
+        self.client_user = self.create_instance(password=self.CURRENT_PASSWORD)
         self.auth_client = APIClient()
         self.auth_client.force_authenticate(user=self.client_user)
 

@@ -15,9 +15,7 @@ class GetTokenTestCase(AuthEndpointTestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = self.create_instance(
-            self.create_data(password=self.USER_PASSWORD)
-        )
+        self.user = self.create_instance(password=self.USER_PASSWORD)
         self.request_data = dict(
             password=self.USER_PASSWORD,
             email=self.user.email,

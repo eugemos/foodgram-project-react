@@ -9,9 +9,7 @@ class UserProfileTestCase(UserEndpointTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.client_user = cls.create_instance(
-            cls.create_data()
-        )
+        cls.client_user = cls.create_instance()
        
     def setUp(self):
         super().setUp()

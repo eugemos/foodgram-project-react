@@ -33,14 +33,12 @@ class UserCreateTestCase(UserEndpointTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.instance = cls.create_instance(
-            cls.create_data(password='ZZaaqq11')
-        )
+        cls.instance = cls.create_instance(password='ZZaaqq11')
 
     def test_request_with_correct_params_ok(self):
-        request_data = self.create_data(n='other', password='ZZaaqq11'*10)
+        request_data = self.create_data(fid='other', password='ZZaaqq11'*10)
         self.extend_fields_to_max_length(request_data)
-        exp_response_data = self.create_data(n='other', id=2)
+        exp_response_data = self.create_data(fid='other', id=2)
         self.extend_fields_to_max_length(exp_response_data)
         self.check_create_reqest_ok(request_data, exp_response_data)
 
@@ -96,13 +94,13 @@ class UserCreateTestCase(UserEndpointTestCase):
         )
 
     def subtest_request_without_required_param_fails(self, field_name):
-        request_data = self.create_data(n='other', password='ZZaaqq11')
+        request_data = self.create_data(fid='other', password='ZZaaqq11')
         del request_data[field_name]
         exp_response_data = {field_name: [self.FIELD_REQUIRED_ERROR_MESSAGE]}
         self.check_create_reqest_fails(request_data, exp_response_data)
 
     def subtest_request_with_too_long_param_fails(self, field_name, limit):
-        sample_data = self.create_data(n='sample', password='ZZaaqq11')
+        sample_data = self.create_data(fid='sample', password='ZZaaqq11')
         self.check_request_with_invalid_param_fails(
             field_name,
             left_extend_str(sample_data[field_name], limit + 1),
@@ -119,9 +117,9 @@ class UserCreateTestCase(UserEndpointTestCase):
 
     def check_request_with_non_unique_param_ok(self, field_name):
         assert field_name not in self.UNIQUE_FIELDS
-        request_data = self.create_data(n='other', password='ZZaaqq22')
+        request_data = self.create_data(fid='other', password='ZZaaqq22')
         request_data[field_name] = getattr(self.instance, field_name)
-        exp_response_data = self.create_data(n='other', id=2)
+        exp_response_data = self.create_data(fid='other', id=2)
         if field_name in exp_response_data:
             exp_response_data[field_name] = getattr(self.instance, field_name)
 
@@ -130,7 +128,7 @@ class UserCreateTestCase(UserEndpointTestCase):
     def check_request_with_invalid_param_fails(
         self, field_name, field_value, error_msg
     ):
-        request_data = self.create_data(n='other', password='ZZaaqq22')
+        request_data = self.create_data(fid='other', password='ZZaaqq22')
         request_data[field_name] = field_value
         exp_response_data = {field_name: [error_msg]}
         self.check_create_reqest_fails(request_data, exp_response_data)
