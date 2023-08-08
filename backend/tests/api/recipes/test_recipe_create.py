@@ -18,8 +18,8 @@ from .base import (
 class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
-    tag_ids = range(1, FIXTURE_TAG_COUNT+1)
-    ingredient_ids = range(1, FIXTURE_INGREDIENT_COUNT+1)
+    tag_fids = range(1, FIXTURE_TAG_COUNT+1)
+    ingredient_fids = range(1, FIXTURE_INGREDIENT_COUNT+1)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )
@@ -31,14 +31,13 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        TestTag.create_instances(cls.tag_ids)
-        TestIngredient.create_instances(cls.ingredient_ids)
+        TestTag.create_instances(cls.tag_fids)
+        TestIngredient.create_instances(cls.ingredient_fids)
         cls.client_user = TestUser.create_instance('client')
-        # cls.client_user = TestUser.create_instance(TestUser.create_data(fid='client'))
 
     @classmethod
-    def ingredient_occurences(cls):
-        return (dict(id=i, amount=i) for i in cls.ingredient_ids)
+    def ingredient_occurences_iter(cls):
+        return (dict(id=fid, amount=fid) for fid in cls.ingredient_fids)
 
     def setUp(self):
         super().setUp()
@@ -213,8 +212,8 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     def create_request_data(self, *, fid=1, **kwargs):
         request_data = self.create_data(
             fid=fid,
-            ingredients = [*self.ingredient_occurences()],
-            tags = [*self.tag_ids],
+            ingredients = [*self.ingredient_occurences_iter()],
+            tags = [*self.tag_fids],
             image = load_file_as_base64_str('test.png'),
             **kwargs
         )
@@ -225,8 +224,8 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         return self.create_data(
             fid=fid,
             author = self.client_user,
-            ingredient_occurences = [*self.ingredient_occurences()],
-            tag_ids = [*self.tag_ids],
+            ingredient_occurences = [*self.ingredient_occurences_iter()],
+            tag_ids = [*self.tag_fids],
             **kwargs
         )
     
@@ -234,14 +233,14 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         exp_response_data = self.create_data(
             fid=fid,
             id = instance.pk,
-            tags = [TestTag.get_instance_data(Tag.objects.get(id=i)) for i in self.tag_ids],
+            tags = [TestTag.get_instance_data(Tag.objects.get(id=i)) for i in self.tag_fids],
             author = TestUser.get_instance_data(self.client_user, is_subscribed=False),
             ingredients = [
                 TestIngredient.get_instance_data(
                     Ingredient.objects.get(id=i),
                     amount=i
                 )
-                for i in self.ingredient_ids
+                for i in self.ingredient_fids
             ],
             is_favorited=False,
             is_in_shopping_cart=False,
