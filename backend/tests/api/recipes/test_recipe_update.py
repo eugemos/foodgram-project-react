@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from api.models import IngredientOccurence
 from tests.base import (
-    TEST_HOST,
+    TEST_HOST, nrange,
     TestIngredient, TestTag, TestUser
 )
 from .base import (
@@ -16,18 +16,16 @@ from .base import (
     load_file_as_base64_str,
 )
 
-def get_range(start, length):
-    return range(start, start+length)
 
 class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
     OLD_TAG_COUNT = 3
     OLD_INGREDIENT_COUNT = 3
-    old_tag_fids = get_range(1, OLD_TAG_COUNT)
-    old_ingredient_fids = get_range(1, OLD_INGREDIENT_COUNT)
+    old_tag_fids = nrange(1, OLD_TAG_COUNT)
+    old_ingredient_fids = nrange(1, OLD_INGREDIENT_COUNT)
     NEW_TAG_COUNT = 3
     NEW_INGREDIENT_COUNT = 3
-    new_tag_fids = get_range(OLD_TAG_COUNT+1, NEW_TAG_COUNT)
-    new_ingredient_fids = get_range(OLD_INGREDIENT_COUNT+1, NEW_INGREDIENT_COUNT)
+    new_tag_fids = nrange(OLD_TAG_COUNT+1, NEW_TAG_COUNT)
+    new_ingredient_fids = nrange(OLD_INGREDIENT_COUNT+1, NEW_INGREDIENT_COUNT)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )

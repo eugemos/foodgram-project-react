@@ -239,3 +239,6 @@ def left_extend_str(s, dest_size, char='q'):
 
 def db_is_sqlite():
     return settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3'
+
+def nrange(start, length):
+    return range(start, start+length)

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from tests.base import (
-    TEST_HOST,
+    TEST_HOST, nrange,
     TestIngredient, TestTag, TestUser
 )
 from .base import RecipeEndpointTestCase
@@ -13,8 +13,8 @@ from .base import RecipeEndpointTestCase
 class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
-    tag_fids = range(1, FIXTURE_TAG_COUNT+1)
-    ingredient_fids = range(1, FIXTURE_INGREDIENT_COUNT+1)
+    tag_fids = nrange(1, FIXTURE_TAG_COUNT)
+    ingredient_fids = nrange(1, FIXTURE_INGREDIENT_COUNT)
 
     @classmethod
     def setUpClass(cls):

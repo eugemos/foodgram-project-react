@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 from api.models import Tag, Ingredient
 from tests.base import (
-    TEST_HOST, left_extend_str,
+    TEST_HOST, left_extend_str, nrange,
     TestTag, TestIngredient, TestUser
 )
 from .base import (
@@ -18,8 +18,8 @@ from .base import (
 class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
-    tag_fids = range(1, FIXTURE_TAG_COUNT+1)
-    ingredient_fids = range(1, FIXTURE_INGREDIENT_COUNT+1)
+    tag_fids = nrange(1, FIXTURE_TAG_COUNT)
+    ingredient_fids = nrange(1, FIXTURE_INGREDIENT_COUNT)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )
