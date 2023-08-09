@@ -93,7 +93,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             non_field_error=True
         )
 
-    @unittest.skip('Надо разобраться с соощением об ошибке')
+    @unittest.skip('Надо разобраться с сообщением об ошибке')
     def test_request_with_nonexistent_ingredient_fails(self):
         print('\nBEGIN\n')
         request_data = self.create_request_data()
@@ -101,7 +101,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             ingredients=[dict(id=self.FIXTURE_INGREDIENT_COUNT+1, amount=1)]
         )
         exp_response_data = {}
-        self.check_auth_reqest_fails(
+        self.check_auth_request_fails(
             request_data, exp_response_data, status.HTTP_404_NOT_FOUND
         )
 
@@ -119,9 +119,9 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
                 {'amount': [error_message]}
             ]
         }
-        self.check_auth_reqest_fails(request_data, exp_response_data)
+        self.check_auth_request_fails(request_data, exp_response_data)
 
-    @unittest.skip('Надо разобраться с соощением об ошибке')
+    @unittest.skip('Надо разобраться с сообщением об ошибке')
     def test_request_with_nonexistent_tag_fails(self):
         print('\nBEGIN\n')
         request_data = self.create_request_data()
@@ -129,7 +129,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
             tags=[self.FIXTURE_TAG_COUNT + 1]
         )
         exp_response_data = {}
-        self.check_auth_reqest_fails(
+        self.check_auth_request_fails(
             request_data, exp_response_data, status.HTTP_404_NOT_FOUND
         )
 
@@ -194,7 +194,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         request_data = self.create_request_data()
         del request_data[field_name]
         exp_response_data = {field_name: [error_message]}
-        self.check_auth_reqest_fails(request_data, exp_response_data)
+        self.check_auth_request_fails(request_data, exp_response_data)
 
     def check_request_with_invalid_param_fails(
         self, field_name, field_value, error_msg, *, non_field_error=False
@@ -207,7 +207,20 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
                 if non_field_error
                 else [error_msg]
         }
-        self.check_auth_reqest_fails(request_data, exp_response_data)
+        self.check_auth_request_fails(request_data, exp_response_data)
+
+    def check_auth_request_fails(
+        self, request_data, exp_response_data, 
+        exp_status=status.HTTP_400_BAD_REQUEST
+    ):
+        initial_pk_set = self.get_pk_set()
+        # Act, Assert on response
+        self.do_auth_request_and_check_response(
+            request_data, exp_response_data, exp_status
+        )
+        # Assert on DB
+        result_pk_set = self.get_pk_set()
+        self.assertEqual(initial_pk_set, result_pk_set)
 
     def create_request_data(self, *, fid=1, **kwargs):
         request_data = self.create_data(
@@ -248,18 +261,6 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         assert set(exp_response_data.keys()) == set(self.OUTPUT_FIELDS)
         return exp_response_data
 
-    def check_auth_reqest_fails(
-        self, request_data, exp_response_data, 
-        exp_status=status.HTTP_400_BAD_REQUEST
-    ):
-        initial_pk_set = self.get_pk_set()
-        # Act, Assert on response
-        self.do_auth_request_and_check_response(
-            request_data, exp_response_data, exp_status
-        )
-        # Assert on DB
-        result_pk_set = self.get_pk_set()
-        self.assertEqual(initial_pk_set, result_pk_set)
 
     def do_auth_request_and_check_response(
         self, request_data, exp_response_data, exp_status
