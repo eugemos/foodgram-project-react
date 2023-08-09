@@ -23,15 +23,12 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.client_user = TestUser.create_instance('client')
-        cls.recipe = cls.create_instance(
-            author=cls.author,
-            image=File(open('tests/data/test.png'), name=f'recipe.png'),
+        cls.recipe = cls.create_recipe(
+            'any', cls.author, cls.tags, cls.ingredients
         )
-        cls.recipe.set_tags(cls.tags)
-        for ingredient in cls.ingredients:
-            cls.recipe.add_ingredient(ingredient, ingredient.pk)
 
         cls.base_exp_response_data = cls.create_data(
+            fid='any',
             id = cls.recipe.pk,
             tags = [TestTag.create_data(fid=fid, id=fid) for fid in cls.tag_fids],
             author = TestUser.create_data(

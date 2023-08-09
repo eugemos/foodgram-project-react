@@ -1,6 +1,7 @@
 from base64 import b64encode
 
 from django.conf import settings
+from django.core.files import File
 
 from tests.base import EndpointTestCase, TestRecipe
 
@@ -17,6 +18,21 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         'id', 'tags', 'author', 'ingredients', 'is_favorited', 
         'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
     )
+
+    @classmethod
+    def create_recipe(
+        cls, fid, author, tags, ingredients, image='test.png'
+    ):
+        recipe = cls.create_instance(
+            fid,
+            author=author,
+            image=File(open(f'tests/data/{image}'), name='recipe.png'),
+        )
+        recipe.set_tags(tags)
+        for ingredient in ingredients:
+            recipe.add_ingredient(ingredient, ingredient.pk)
+
+        return recipe
 
 
 def load_file_as_base64_str(file_name):

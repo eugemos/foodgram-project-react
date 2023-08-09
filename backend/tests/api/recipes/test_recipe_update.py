@@ -41,14 +41,9 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         new_ingredients = TestIngredient.create_instances(cls.new_ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
-        cls.recipe = cls.create_instance(
-            'old',
-            author=cls.author,
-            image=File(open('tests/data/test.png'), name=f'recipe.png'),
+        cls.recipe = cls.create_recipe(
+            'old', cls.author, old_tags, old_ingredients
         )
-        cls.recipe.set_tags(old_tags)
-        for ingredient in old_ingredients:
-            cls.recipe.add_ingredient(ingredient, ingredient.pk)
 
     @classmethod
     def ingredient_occurences_iter(cls, fids):
