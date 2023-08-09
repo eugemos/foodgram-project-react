@@ -70,6 +70,7 @@ class TagField(serializers.PrimaryKeyRelatedField):
 
         return super().to_representation(instance)
 
+
 class RecipeSerializer(serializers.ModelSerializer):
     image = RecipeImageField(required=True)
     tags = TagField(
@@ -114,16 +115,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
         instance = super().update(instance, validated_data)
-        recipe.tags.set(tags)
-        # instance.ingredients.clear()
-        IngredientOccurence.objects.filter(recipe=instance).delete()
+        instance.tags.set(tags)
+        instance.ingredients.all().delete()
         for occurence in ingredients:
-            IngredientOccurence.objects.create(
-                ingredient=occurence['ingredient'],
-                recipe=receipe,
-                amount=occurence['amount']
-            )
+            instance.add_ingredient(occurence['ingredient'], occurence['amount'])
 
         return instance
