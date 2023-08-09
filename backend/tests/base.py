@@ -10,8 +10,6 @@ TEST_HOST = 'http://testserver'
 
 
 class EndpointTestCase(APITestCase):
-    UNAUTHORIZED_ERROR_MESSAGE = 'Учетные данные не были предоставлены.'
-    PAGE_NOT_FOUND_ERROR_MESSAGE = 'Страница не найдена.'
     FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
     NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
     NULL_LIST_DISALLOWED_ERROR_MESSAGE = 'Этот список не может быть пустым.'
@@ -24,7 +22,11 @@ class EndpointTestCase(APITestCase):
     TOO_SMALL_VALUE_ERROR_MESSAGE_TEMPLATE = (
         'Убедитесь, что это значение больше либо равно {}.'
     )
+    UNAUTHORIZED_ERROR_MESSAGE = 'Учетные данные не были предоставлены.'
+    FORBIDDEN_ERROR_MESSAGE = 'У вас недостаточно прав для выполнения данного действия.'
+    PAGE_NOT_FOUND_ERROR_MESSAGE = 'Страница не найдена.'
     UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
+    FORBIDDEN_ERROR_RESPONSE_DATA = dict(detail=FORBIDDEN_ERROR_MESSAGE)
     PAGE_NOT_FOUND_RESPONSE_DATA = dict(detail=PAGE_NOT_FOUND_ERROR_MESSAGE)
 
     def do_request_and_check_response(
@@ -222,11 +224,10 @@ class TestRecipe(TestModel):
 
     @classmethod
     def create_data(cls, *, fid=1, **kwargs):
-        fid = int(fid)
         data = dict(
             name=f'recipe_{fid}',
             text=f'rext_{fid}',
-            cooking_time=fid,
+            cooking_time=fid if isinstance(fid, int) else (hash(fid) % 1000) + 1,
             # author & image отсутствуют - так надо!
         )
         data.update(**kwargs)
