@@ -170,22 +170,11 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         return data
 
     def create_exp_response_data(self, instance, *, fid, **kwargs):
-        exp_response_data = self.create_data(
-            fid=fid,
-            id=instance.pk,
-            tags=[TestTag.create_data(fid=fid, id=fid) for fid in self.new_tag_fids],
-            author=TestUser.create_data(fid='author', id=self.author.id, is_subscribed=False),
-            ingredients=[
-                TestIngredient.create_data(fid=fid, id=fid, amount=fid)
-                for fid in self.new_ingredient_fids
-            ],
-            is_favorited=False,
-            is_in_shopping_cart=False,
-            image=f'{TEST_HOST}{settings.MEDIA_URL}{instance.image.name}'
+        return super().create_exp_response_data(
+            instance, fid=fid, author_fid='author', author_id=self.author.id,
+            tag_fids=self.new_tag_fids, 
+            ingredient_fids=self.new_ingredient_fids, **kwargs
         )
-        exp_response_data.update(**kwargs)
-        assert set(exp_response_data.keys()) == set(self.OUTPUT_FIELDS)
-        return exp_response_data
 
     def do_request_and_check_response(
         self, client, id, request_data, exp_response_data, exp_status

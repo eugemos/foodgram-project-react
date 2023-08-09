@@ -3,7 +3,10 @@ from base64 import b64encode
 from django.conf import settings
 from django.core.files import File
 
-from tests.base import EndpointTestCase, TestRecipe
+from tests.base import (
+    TEST_HOST,
+    EndpointTestCase, TestRecipe, TestTag, TestIngredient, TestUser
+)
 
 
 BASE64_PREFIX = 'data:image/png;base64,'
@@ -33,6 +36,30 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
             recipe.add_ingredient(ingredient, ingredient.pk)
 
         return recipe
+
+    @classmethod
+    def create_exp_response_data(
+        cls, instance, *, fid, author_fid, author_id, 
+        tag_fids, ingredient_fids, **kwargs
+    ):
+        exp_response_data = cls.create_data(
+            fid=fid,
+            id=instance.pk,
+            tags=[TestTag.create_data(fid=fid, id=fid) for fid in tag_fids],
+            author=TestUser.create_data(
+                fid=author_fid, id=author_id, is_subscribed=False
+            ),
+            ingredients=[
+                TestIngredient.create_data(fid=fid, id=fid, amount=fid)
+                for fid in ingredient_fids
+            ],
+            is_favorited=False,
+            is_in_shopping_cart=False,
+            image=f'{TEST_HOST}{settings.MEDIA_URL}{instance.image.name}'
+        )
+        exp_response_data.update(**kwargs)
+        assert set(exp_response_data.keys()) == set(cls.OUTPUT_FIELDS)
+        return exp_response_data
 
 
 def load_file_as_base64_str(file_name):

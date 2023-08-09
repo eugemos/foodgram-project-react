@@ -27,22 +27,10 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
             'any', cls.author, cls.tags, cls.ingredients
         )
 
-        cls.base_exp_response_data = cls.create_data(
-            fid='any',
-            id = cls.recipe.pk,
-            tags = [TestTag.create_data(fid=fid, id=fid) for fid in cls.tag_fids],
-            author = TestUser.create_data(
-                fid='author', id=cls.author.pk, is_subscribed=False
-            ),
-            ingredients = [
-                TestIngredient.create_data(fid=fid, id=fid, amount=fid)
-                for fid in cls.ingredient_fids
-            ],
-            is_favorited=False,
-            is_in_shopping_cart=False,
-            image=f'{TEST_HOST}{settings.MEDIA_URL}{cls.recipe.image.name}'
+        cls.base_exp_response_data = cls.create_exp_response_data(
+            cls.recipe, fid='any', author_fid='author', author_id=cls.author.pk, 
+            tag_fids=cls.tag_fids, ingredient_fids=cls.ingredient_fids
         )
-        assert set(cls.base_exp_response_data.keys()) == set(cls.OUTPUT_FIELDS)
 
     def setUp(self):
         super().setUp()
