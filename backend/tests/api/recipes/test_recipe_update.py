@@ -28,10 +28,6 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
     NEW_INGREDIENT_COUNT = 3
     new_tag_fids = get_range(OLD_TAG_COUNT+1, NEW_TAG_COUNT)
     new_ingredient_fids = get_range(OLD_INGREDIENT_COUNT+1, NEW_INGREDIENT_COUNT)
-    # TOTAL_TAG_COUNT = OLD_TAG_COUNT + NEW_TAG_COUNT
-    # TOTAL_INGREDIENT_COUNT = OLD_INGREDIENT_COUNT + NEW_INGREDIENT_COUNT
-    # all_tag_fids = range(1, TOTAL_TAG_COUNT+1)
-    # all_ingredient_fids = range(1, TOTAL_INGREDIENT_COUNT+1)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )
@@ -66,7 +62,6 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         self.user_client.force_authenticate(user=self.user)
         self.maxDiff = None
     
-
     def test_author_can_update_recipe(self):
         initial_pk_set = self.get_pk_set()
         request_data = self.create_request_data(fid='new')
@@ -153,7 +148,6 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         self.assertEqual(exp_image_name, instance.image.name)
         self.assertEqual(IngredientOccurence.objects.count(), self.OLD_INGREDIENT_COUNT)
 
-
     def test_request_with_invalid_param_fails(self):
         # При обновлении рецепта используется тот же самый сериализатор,
         # что и при создании. Так как для операции создания рецепта все 
@@ -199,7 +193,6 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         exp_response_data.update(**kwargs)
         assert set(exp_response_data.keys()) == set(self.OUTPUT_FIELDS)
         return exp_response_data
-
 
     def do_request_and_check_response(
         self, client, id, request_data, exp_response_data, exp_status

@@ -11,16 +11,10 @@ from .base import RecipeEndpointTestCase
 
 
 class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
-    # TAGS_PER_RECIPE = 2
-    # INGREDIENTS_PER_RECIPE = 2
-    # FIXTURE_RECIPE_COUNT = 2**3
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
-    # FIXTURE_AUTHOR_COUNT = 2
-    # recipe_ids = range(1, FIXTURE_RECIPE_COUNT+1)
     tag_fids = range(1, FIXTURE_TAG_COUNT+1)
     ingredient_fids = range(1, FIXTURE_INGREDIENT_COUNT+1)
-    # author_ids = range(1, FIXTURE_AUTHOR_COUNT+1)
 
     @classmethod
     def setUpClass(cls):
