@@ -27,7 +27,9 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
             'any', cls.author, cls.tags, cls.ingredients
         )
 
-        cls.base_exp_response_data = cls.create_exp_response_data(
+    @classmethod
+    def create_exp_response_data(cls):
+        return super().create_exp_response_data(
             cls.recipe, fid='any', author_fid='author', author_id=cls.author.pk, 
             tag_fids=cls.tag_fids, ingredient_fids=cls.ingredient_fids
         )
@@ -39,7 +41,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         self.maxDiff = None
 
     def test_auth_user_can_retrieve_recipe_detail(self):
-        exp_response_data = self.base_exp_response_data
+        exp_response_data = self.create_exp_response_data()
         self.do_auth_request_and_check_response(
             self.recipe.pk, exp_response_data, status.HTTP_200_OK
         )
@@ -47,7 +49,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
     def test_auth_user_can_retrieve_recipe_detail_1(self):
         self.set_bool_fields_to_true()
         exp_response_data = dict(
-            self.base_exp_response_data,
+            self.create_exp_response_data(),
             author = TestUser.create_data(
                 fid='author', id=self.author.pk, is_subscribed=True
             ),
@@ -60,7 +62,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
 
     def test_anon_user_can_retrieve_recipe_detail(self):
         self.set_bool_fields_to_true()
-        exp_response_data = self.base_exp_response_data
+        exp_response_data = self.create_exp_response_data()
         self.do_anon_request_and_check_response(
             self.recipe.pk, exp_response_data, status.HTTP_200_OK
         )
