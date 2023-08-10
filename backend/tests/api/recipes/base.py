@@ -2,6 +2,7 @@ from base64 import b64encode
 
 from django.conf import settings
 from django.core.files import File
+from rest_framework import status
 
 from tests.base import (
     TEST_HOST,
@@ -91,6 +92,29 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         exp_response_data.update(**kwargs)
         assert set(exp_response_data.keys()) == set(cls.OUTPUT_FIELDS)
         return exp_response_data
+
+
+class CheckRequestWithoutRequiredParamFailsMixin:
+    def check_request_without_required_param_fails(self, client, field_name, error_message):
+        request_data = self.create_request_data()
+        del request_data[field_name]
+        exp_response_data = {field_name: [error_message]}
+        self.check_request_fails(
+            client, 
+            request_data, 
+            exp_response_data, 
+            status.HTTP_400_BAD_REQUEST
+        )
+
+    def do_checks_request_without_required_param_fails(
+        self, client, required_fields, error_messages: dict={}
+    ):
+        for field in required_fields:
+            with self.subTest(what=f'Реакция на отсутствие поля {field}'):
+                self.check_request_without_required_param_fails(
+                    client, field, 
+                    error_messages.get(field, self.FIELD_REQUIRED_ERROR_MESSAGE)
+                )
 
 
 def load_file_as_base64_str(file_name):

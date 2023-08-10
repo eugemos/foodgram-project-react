@@ -11,11 +11,14 @@ from tests.base import (
     TestTag, TestIngredient, TestUser
 )
 from .base import (
-    RecipeEndpointTestCase,
+    RecipeEndpointTestCase, CheckRequestWithoutRequiredParamFailsMixin,
     load_file_as_base64_str,
 )
 
-class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
+class RecipeCreateEndpointTestCase(
+    CheckRequestWithoutRequiredParamFailsMixin,
+    RecipeEndpointTestCase
+):
     FIXTURE_TAG_COUNT = 3
     FIXTURE_INGREDIENT_COUNT = 3
     tag_fids = nrange(1, FIXTURE_TAG_COUNT)
@@ -63,16 +66,11 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         self.check_only_instance_created(initial_pk_set)
 
     def test_request_without_required_param_fails(self):
-        for field in self.REQUIRED_FIELDS:
-            with self.subTest(what=f'Реакция на отсутствие поля {field}'):
-                error_message = (
-                    'Ни одного файла не было отправлено.'
-                    if field == 'image' 
-                    else self.FIELD_REQUIRED_ERROR_MESSAGE
-                )
-                self.subtest_request_without_required_param_fails(
-                    field, error_message
-                )
+        self.do_checks_request_without_required_param_fails(
+            self.auth_client, 
+            self.REQUIRED_FIELDS,
+            {'image': 'Ни одного файла не было отправлено.'}
+        )
 
     def test_request_with_null_param_fails(self):
         for field in self.NON_NULL_FIELDS:
@@ -184,14 +182,6 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         exp_response_data = self.create_exp_response_data(instance, fid=fid)
         self.assertEqual(exp_response_data, response_data)
 
-    def subtest_request_without_required_param_fails(
-        self, field_name, error_message
-    ):
-        request_data = self.create_request_data()
-        del request_data[field_name]
-        exp_response_data = {field_name: [error_message]}
-        self.check_auth_request_fails(request_data, exp_response_data)
-
     def check_request_with_invalid_param_fails(
         self, field_name, field_value, error_msg, *, non_field_error=False
     ):
@@ -209,10 +199,18 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         self, request_data, exp_response_data, 
         exp_status=status.HTTP_400_BAD_REQUEST
     ):
+        self.check_request_fails(
+            self.auth_client, request_data, exp_response_data, exp_status
+        )
+
+    def check_request_fails(
+        self, client, request_data, exp_response_data,
+        exp_status
+    ):
         initial_pk_set = self.get_pk_set()
         # Act, Assert on response
-        self.do_auth_request_and_check_response(
-            request_data, exp_response_data, exp_status
+        self.do_request_and_check_response(
+            client, request_data, exp_response_data, exp_status
         )
         # Assert on DB
         result_pk_set = self.get_pk_set()

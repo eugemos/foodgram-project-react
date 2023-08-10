@@ -12,12 +12,15 @@ from tests.base import (
     TestIngredient, TestTag, TestUser
 )
 from .base import (
-    RecipeEndpointTestCase,
+    RecipeEndpointTestCase, CheckRequestWithoutRequiredParamFailsMixin,
     load_file_as_base64_str,
 )
 
 
-class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
+class RecipeUpdateEndpointTestCase(
+    CheckRequestWithoutRequiredParamFailsMixin,
+    RecipeEndpointTestCase
+):
     OLD_TAG_COUNT = 3
     OLD_INGREDIENT_COUNT = 3
     old_tag_fids = nrange(1, OLD_TAG_COUNT)
@@ -91,14 +94,11 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         )
         
     def test_request_without_required_param_fails(self):
-        for field in self.REQUIRED_FIELDS:
-            with self.subTest(field=field):
-                error_message = (
-                    'Ни одного файла не было отправлено.'
-                    if field == 'image' 
-                    else self.FIELD_REQUIRED_ERROR_MESSAGE
-                )
-                self.check_request_without_required_param_fails(field, error_message)
+        self.do_checks_request_without_required_param_fails(
+            self.author_client, 
+            self.REQUIRED_FIELDS,
+            {'image': 'Ни одного файла не было отправлено.'}
+        )
         
     def test_request_to_unexistent_recipe_fails(self):
         request_data = self.create_request_data(fid='new')
@@ -108,18 +108,12 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
             request_data, exp_response_data, status.HTTP_404_NOT_FOUND
         )
 
-    def check_request_without_required_param_fails(self, field_name, error_message):
-        request_data = self.create_request_data(fid='new')
-        del request_data[field_name]
-        exp_response_data = {
-            field_name: [error_message]
-        }
-        self.check_request_fails(
-            self.author_client, 
-            request_data, 
-            exp_response_data, 
-            status.HTTP_400_BAD_REQUEST
-        )
+    def test_request_with_invalid_param_fails(self):
+        # При обновлении рецепта используется тот же самый сериализатор,
+        # что и при создании. Так как для операции создания рецепта все 
+        # возможные ошибочные ситуации уже протестированы, то тестировать
+        # тоже самое ещё и при обновлении рецепта является избыточным.
+        pass
     
     def check_request_fails(self, client, request_data, exp_response_data, exp_status):
         initial_pk_set = self.get_pk_set()
@@ -137,14 +131,7 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         self.assertEqual(exp_image_name, instance.image.name)
         self.assertEqual(IngredientOccurence.objects.count(), self.OLD_INGREDIENT_COUNT)
 
-    def test_request_with_invalid_param_fails(self):
-        # При обновлении рецепта используется тот же самый сериализатор,
-        # что и при создании. Так как для операции создания рецепта все 
-        # возможные ошибочные ситуации уже протестированы, то тестировать
-        # тоже самое ещё и при обновлении рецепта является избыточным.
-        pass
-
-    def create_request_data(self, *, fid, **kwargs):
+    def create_request_data(self, *, fid='any', **kwargs):
         return super().create_request_data(
             fid=fid,
             tag_fids=self.new_tag_fids, 
