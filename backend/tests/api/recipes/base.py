@@ -42,6 +42,20 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         return recipe
 
     @classmethod
+    def create_request_data(
+        cls, *, fid, tag_fids, ingredient_fids, image_file, **kwargs
+    ):
+        request_data = cls.create_data(
+            fid=fid,
+            ingredients=[*cls.ingredient_occurences_iter(ingredient_fids)],
+            tags=[*tag_fids],
+            image=load_file_as_base64_str(image_file),
+        )
+        request_data.update(**kwargs)
+        assert set(request_data.keys()) == set(cls.INPUT_FIELDS)
+        return request_data
+
+    @classmethod
     def create_exp_response_data(
         cls, instance, *, fid, author_fid, author_id, 
         tag_fids, ingredient_fids, **kwargs

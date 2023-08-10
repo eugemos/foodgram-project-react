@@ -145,15 +145,13 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
         pass
 
     def create_request_data(self, *, fid, **kwargs):
-        request_data = self.create_data(
+        return super().create_request_data(
             fid=fid,
-            ingredients=[*self.ingredient_occurences_iter(self.new_ingredient_fids)],
-            tags=[*self.new_tag_fids],
-            image=load_file_as_base64_str('new.png'),
+            tag_fids=self.new_tag_fids, 
+            ingredient_fids=self.new_ingredient_fids,
+            image_file='new.png', 
+            **kwargs
         )
-        request_data.update(**kwargs)
-        assert set(request_data.keys()) == set(self.INPUT_FIELDS)
-        return request_data
 
     def create_exp_instance_data(self, *, fid, **kwargs):
         data = self.create_data(

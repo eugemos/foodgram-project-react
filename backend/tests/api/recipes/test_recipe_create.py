@@ -219,15 +219,13 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         self.assertEqual(initial_pk_set, result_pk_set)
 
     def create_request_data(self, *, fid=1, **kwargs):
-        request_data = self.create_data(
+        return super().create_request_data(
             fid=fid,
-            ingredients=[*self.ingredient_occurences_iter(self.ingredient_fids)],
-            tags=[*self.tag_fids],
-            image=load_file_as_base64_str('test.png'),
+            tag_fids=self.tag_fids, 
+            ingredient_fids=self.ingredient_fids,
+            image_file='test.png', 
+            **kwargs
         )
-        request_data.update(**kwargs)
-        assert set(request_data.keys()) == set(self.INPUT_FIELDS)
-        return request_data
 
     def create_exp_instance_data(self, *, fid=1, **kwargs):
         data = self.create_data(
