@@ -56,6 +56,19 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         return request_data
 
     @classmethod
+    def create_exp_instance_data(
+        cls, *, fid, author, tag_fids, ingredient_fids, **kwargs
+    ):
+        data = cls.create_data(
+            fid=fid,
+            author=author,
+            ingredients=[*cls.ingredient_occurences_iter(ingredient_fids)],
+            tags=[*tag_fids],
+        )
+        data.update(**kwargs)
+        return data
+
+    @classmethod
     def create_exp_response_data(
         cls, instance, *, fid, author_fid, author_id, 
         tag_fids, ingredient_fids, **kwargs

@@ -228,14 +228,10 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         )
 
     def create_exp_instance_data(self, *, fid=1, **kwargs):
-        data = self.create_data(
-            fid=fid,
-            author=self.client_user,
-            ingredients=[*self.ingredient_occurences_iter(self.ingredient_fids)],
-            tags=[*self.tag_fids],
+        return super().create_exp_instance_data(
+            fid=fid, author=self.client_user, tag_fids=self.tag_fids,
+            ingredient_fids=self.ingredient_fids, **kwargs
         )
-        data.update(**kwargs)
-        return data
     
     def create_exp_response_data(self, instance, *, fid=1, **kwargs):
         return super().create_exp_response_data(
