@@ -43,10 +43,6 @@ class RecipeUpdateEndpointTestCase(RecipeEndpointTestCase):
             'old', cls.author, old_tags, old_ingredients
         )
 
-    @classmethod
-    def ingredient_occurences_iter(cls, fids):
-        return (dict(id=fid, amount=fid) for fid in fids)
-
     def setUp(self):
         super().setUp()
         self.author_client = APIClient()

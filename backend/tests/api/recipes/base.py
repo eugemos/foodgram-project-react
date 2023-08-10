@@ -23,6 +23,10 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
     )
 
     @classmethod
+    def ingredient_occurences_iter(cls, fids):
+        return (dict(id=fid, amount=fid) for fid in fids)
+
+    @classmethod
     def create_recipe(
         cls, fid, author, tags, ingredients, image='test.png'
     ):

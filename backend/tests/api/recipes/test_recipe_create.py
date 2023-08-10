@@ -35,10 +35,6 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         TestIngredient.create_instances(cls.ingredient_fids)
         cls.client_user = TestUser.create_instance('client')
 
-    @classmethod
-    def ingredient_occurences_iter(cls):
-        return (dict(id=fid, amount=fid) for fid in cls.ingredient_fids)
-
     def setUp(self):
         super().setUp()
         self.auth_client = APIClient()
@@ -225,7 +221,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
     def create_request_data(self, *, fid=1, **kwargs):
         request_data = self.create_data(
             fid=fid,
-            ingredients=[*self.ingredient_occurences_iter()],
+            ingredients=[*self.ingredient_occurences_iter(self.ingredient_fids)],
             tags=[*self.tag_fids],
             image=load_file_as_base64_str('test.png'),
         )
@@ -237,7 +233,7 @@ class RecipeCreateEndpointTestCase(RecipeEndpointTestCase):
         data = self.create_data(
             fid=fid,
             author=self.client_user,
-            ingredients=[*self.ingredient_occurences_iter()],
+            ingredients=[*self.ingredient_occurences_iter(self.ingredient_fids)],
             tags=[*self.tag_fids],
         )
         data.update(**kwargs)
