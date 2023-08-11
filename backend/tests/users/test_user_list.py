@@ -1,7 +1,8 @@
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from tests.base import TEST_HOST, DEFAULT_PAGE_SIZE, nrange
+from tests.base import DEFAULT_PAGE_SIZE, nrange
+from tests.paginator import TestPaginator
 from .base import UserEndpointTestCase
 
 
@@ -16,16 +17,11 @@ class UserListTestCase(UserEndpointTestCase):
     ):
         self.maxDiff = None
         self.instance_count = instance_count
-        self.page_size = page_size
-        self.create_instances(self.get_data_iter(nrange(1, self.instance_count)))
-
-        assert self.Model.objects.count() == instance_count
-        self.underfull_page_size = instance_count % page_size
-        self.page_count = (
-            instance_count // page_size 
-            + (self.underfull_page_size > 0)
+        self.paginator = TestPaginator(
+            self.BASE_URL, page_size=page_size, instance_count=instance_count
         )
-
+        self.create_instances(self.get_data_iter(nrange(1, instance_count)))
+        assert self.Model.objects.count() == instance_count       
         for user in (self.Model.objects.get(pk=pk) for pk in subscriptions):
             user.set_subscriptions(
                 self.Model.objects.get(pk=pk) for pk in subscriptions[user.pk]
@@ -54,10 +50,11 @@ class UserListTestCase(UserEndpointTestCase):
         self.perform_test(self.client, 1)
 
     def test_list_action_with_params(self):
-        self.prepare(instance_count=16, page_size=5)
+        page_size = 5
+        self.prepare(instance_count=16, page_size=page_size)
         for page in range(1, 5):
             with self.subTest(page=page):
-                self.perform_test(self.client, page, params=dict(limit=self.page_size, page=page))
+                self.perform_test(self.client, page, params=dict(limit=page_size, page=page))
 
     def perform_test(self, client, page, subscribed=(), *, params=dict()):
         self.do_request_and_check_response(
@@ -67,12 +64,12 @@ class UserListTestCase(UserEndpointTestCase):
         )
            
     def create_exp_response_data(self, page, params, subscribed):
-        page_size = self.page_size if page != self.page_count else self.last_page_size()
-        start_fid = (page - 1)*self.page_size + 1
+        page_size = self.paginator.actual_page_size(page)
+        start_fid = self.paginator.first_item_number(page)
         return dict(
             count=self.instance_count,
-            previous=self.previous_page_link(page, params),
-            next=self.next_page_link(page, params),
+            previous=self.paginator.previous_page_link(page, params),
+            next=self.paginator.next_page_link(page, params),
             results= [
                 self.create_data(fid=fid, id=fid, is_subscribed=(fid in subscribed))
                 for fid in nrange(start_fid, page_size)
@@ -87,43 +84,6 @@ class UserListTestCase(UserEndpointTestCase):
 
         return client
 
-    def previous_page_link(self, page, request_params):
-        if page <= 1:
-            return None
-
-        link = TEST_HOST + self.BASE_URL        
-        params = []
-        if 'limit' in request_params:
-            params.append(f'limit={request_params["limit"]}')
-
-        prev_page = page - 1
-        if prev_page > 1:
-            params.append(f'page={prev_page}')
-
-        param_str = '&'.join(params)
-        return f'{link}?{param_str}' if param_str else link
-
-    def next_page_link(self, page, request_params):
-        if page >= self.page_count:
-            return None
-
-        link = TEST_HOST + self.BASE_URL        
-        params = []
-        if 'limit' in request_params:
-            params.append(f'limit={request_params["limit"]}')
-
-        next_page = page + 1
-        params.append(f'page={next_page}')
-        param_str = '&'.join(params)
-        return f'{link}?{param_str}'
-
-    def last_page_size(self):
-        return (
-            self.page_size 
-            if self.underfull_page_size == 0
-            else self.underfull_page_size
-        )
-    
     def do_request_and_check_response(
         self, client, request_data, exp_response_data,
         exp_status=status.HTTP_200_OK
