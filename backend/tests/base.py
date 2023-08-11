@@ -7,6 +7,7 @@ from api.models import Tag, Ingredient, Recipe
 
 
 TEST_HOST = 'http://testserver'
+DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
 
 
 class EndpointTestCase(APITestCase):
