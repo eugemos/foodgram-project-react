@@ -5,7 +5,7 @@ from django.core.files import File
 from rest_framework import status
 
 from tests.base import (
-    TEST_HOST,
+    TEST_HOST, nrange,
     EndpointTestCase, TestRecipe, TestTag, TestIngredient, TestUser
 )
 
@@ -22,6 +22,17 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         'id', 'tags', 'author', 'ingredients', 'is_favorited', 
         'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
     )
+
+    TAG_COUNT = 3
+    INGREDIENT_COUNT = 3
+    tag_fids = nrange(1, TAG_COUNT)
+    ingredient_fids = nrange(1, INGREDIENT_COUNT)
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.tags = TestTag.create_instances(cls.tag_fids)
+        cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
 
     @classmethod
     def ingredient_occurences_iter(cls, fids):

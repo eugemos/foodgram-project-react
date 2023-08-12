@@ -21,10 +21,8 @@ class RecipeUpdateTestCase(
     CheckRequestWithoutRequiredParamFailsMixin,
     RecipeEndpointTestCase
 ):
-    TAG_COUNT = 3
-    INGREDIENT_COUNT = 3
-    tag_fids = nrange(1, TAG_COUNT)
-    ingredient_fids = nrange(1, INGREDIENT_COUNT)
+    TAG_COUNT = RecipeEndpointTestCase.TAG_COUNT
+    INGREDIENT_COUNT = RecipeEndpointTestCase.INGREDIENT_COUNT
     NEW_TAG_COUNT = TAG_COUNT + 1
     NEW_INGREDIENT_COUNT = INGREDIENT_COUNT + 1
     new_tag_fids = nrange(TAG_COUNT+1, NEW_TAG_COUNT)
@@ -36,14 +34,12 @@ class RecipeUpdateTestCase(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        tags = TestTag.create_instances(cls.tag_fids)
-        ingredients = TestIngredient.create_instances(cls.ingredient_fids)
         new_tags = TestTag.create_instances(cls.new_tag_fids)
         new_ingredients = TestIngredient.create_instances(cls.new_ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
         cls.recipe = cls.create_recipe(
-            'old', cls.author, tags, ingredients
+            'old', cls.author, cls.tags, cls.ingredients
         )
 
     def setUp(self):

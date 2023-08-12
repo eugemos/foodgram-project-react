@@ -19,10 +19,6 @@ class RecipeCreateEndpointTestCase(
     CheckRequestWithoutRequiredParamFailsMixin,
     RecipeEndpointTestCase
 ):
-    TAG_COUNT = 3
-    INGREDIENT_COUNT = 3
-    tag_fids = nrange(1, TAG_COUNT)
-    ingredient_fids = nrange(1, INGREDIENT_COUNT)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )
@@ -34,8 +30,6 @@ class RecipeCreateEndpointTestCase(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        TestTag.create_instances(cls.tag_fids)
-        TestIngredient.create_instances(cls.ingredient_fids)
         cls.client_user = TestUser.create_instance('client')
 
     def setUp(self):

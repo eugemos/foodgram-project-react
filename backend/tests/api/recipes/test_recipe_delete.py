@@ -9,16 +9,10 @@ from .base import RecipeEndpointTestCase
 
 
 class RecipeDeleteEndpointTestCase(RecipeEndpointTestCase):
-    TAG_COUNT = 3
-    INGREDIENT_COUNT = 3
-    tag_fids = nrange(1, TAG_COUNT)
-    ingredient_fids = nrange(1, INGREDIENT_COUNT)
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.tags = TestTag.create_instances(cls.tag_fids)
-        cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
         cls.recipe = cls.create_recipe(
