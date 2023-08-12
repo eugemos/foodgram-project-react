@@ -20,7 +20,7 @@ class UserListTestCase(UserEndpointTestCase):
         self.paginator = TestPaginator(
             self.BASE_URL, page_size=page_size, instance_count=instance_count
         )
-        self.create_instances(self.get_data_iter(nrange(1, instance_count)))
+        self.create_instances(nrange(1, instance_count))
         assert self.Model.objects.count() == instance_count       
         for user in (self.Model.objects.get(pk=pk) for pk in subscriptions):
             user.set_subscriptions(

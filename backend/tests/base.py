@@ -139,10 +139,6 @@ class TestModel:
         return tuple(cls.create_instance(data) for data in data_seq)
 
     @classmethod
-    def get_data_iter(cls, iter):
-        return (cls.create_data(fid=i) for i in iter)
-        
-    @classmethod
     def get_pk_set(cls):
         return set(instance.pk for instance in cls.Model.objects.all())
 
@@ -247,3 +243,10 @@ def db_is_sqlite():
 
 def nrange(start, length):
     return range(start, start+length)
+
+def get_nth_subset(sec, n):
+    sec_len = len(sec)
+    # for n in range(2**sec_len):
+    assert n < 2**sec_len
+    mask = format(n, f'0{sec_len}b')
+    return (sec[i] for i in range(sec_len) if mask[i]=='1')
