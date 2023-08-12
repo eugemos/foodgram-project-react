@@ -9,10 +9,10 @@ from .base import RecipeEndpointTestCase
 
 
 class RecipeDeleteEndpointTestCase(RecipeEndpointTestCase):
-    FIXTURE_TAG_COUNT = 3
-    FIXTURE_INGREDIENT_COUNT = 3
-    tag_fids = nrange(1, FIXTURE_TAG_COUNT)
-    ingredient_fids = nrange(1, FIXTURE_INGREDIENT_COUNT)
+    TAG_COUNT = 3
+    INGREDIENT_COUNT = 3
+    tag_fids = nrange(1, TAG_COUNT)
+    ingredient_fids = nrange(1, INGREDIENT_COUNT)
 
     @classmethod
     def setUpClass(cls):
@@ -74,7 +74,7 @@ class RecipeDeleteEndpointTestCase(RecipeEndpointTestCase):
     def check_db_not_changed(self):
         self.assertEqual(self.Model.objects.count(), 1)
         self.assertEqual(
-            IngredientOccurence.objects.count(), self.FIXTURE_INGREDIENT_COUNT
+            IngredientOccurence.objects.count(), self.INGREDIENT_COUNT
         )
         self.assertEqual(self.user.favorites.count(), 1)
         self.assertEqual(self.user.shopping_cart.count(), 1)
