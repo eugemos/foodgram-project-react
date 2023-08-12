@@ -17,18 +17,18 @@ from .base import (
 )
 
 
-class RecipeUpdateEndpointTestCase(
+class RecipeUpdateTestCase(
     CheckRequestWithoutRequiredParamFailsMixin,
     RecipeEndpointTestCase
 ):
-    OLD_TAG_COUNT = 3
-    OLD_INGREDIENT_COUNT = 3
-    old_tag_fids = nrange(1, OLD_TAG_COUNT)
-    old_ingredient_fids = nrange(1, OLD_INGREDIENT_COUNT)
-    NEW_TAG_COUNT = 3
-    NEW_INGREDIENT_COUNT = 3
-    new_tag_fids = nrange(OLD_TAG_COUNT+1, NEW_TAG_COUNT)
-    new_ingredient_fids = nrange(OLD_INGREDIENT_COUNT+1, NEW_INGREDIENT_COUNT)
+    TAG_COUNT = 3
+    INGREDIENT_COUNT = 3
+    tag_fids = nrange(1, TAG_COUNT)
+    ingredient_fids = nrange(1, INGREDIENT_COUNT)
+    NEW_TAG_COUNT = TAG_COUNT + 1
+    NEW_INGREDIENT_COUNT = INGREDIENT_COUNT + 1
+    new_tag_fids = nrange(TAG_COUNT+1, NEW_TAG_COUNT)
+    new_ingredient_fids = nrange(INGREDIENT_COUNT+1, NEW_INGREDIENT_COUNT)
     REQUIRED_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time'
     )
@@ -36,14 +36,14 @@ class RecipeUpdateEndpointTestCase(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        old_tags = TestTag.create_instances(cls.old_tag_fids)
-        old_ingredients = TestIngredient.create_instances(cls.old_ingredient_fids)
+        tags = TestTag.create_instances(cls.tag_fids)
+        ingredients = TestIngredient.create_instances(cls.ingredient_fids)
         new_tags = TestTag.create_instances(cls.new_tag_fids)
         new_ingredients = TestIngredient.create_instances(cls.new_ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
         cls.recipe = cls.create_recipe(
-            'old', cls.author, old_tags, old_ingredients
+            'old', cls.author, tags, ingredients
         )
 
     def setUp(self):
@@ -129,7 +129,7 @@ class RecipeUpdateEndpointTestCase(
         instance = self.Model.objects.get(pk=self.recipe.pk)
         self.assertEqual(exp_instance_data, self.get_instance_data(instance))
         self.assertEqual(exp_image_name, instance.image.name)
-        self.assertEqual(IngredientOccurence.objects.count(), self.OLD_INGREDIENT_COUNT)
+        self.assertEqual(IngredientOccurence.objects.count(), self.INGREDIENT_COUNT)
 
     def create_request_data(self, *, fid='any', **kwargs):
         return super().create_request_data(
