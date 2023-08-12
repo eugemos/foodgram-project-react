@@ -139,6 +139,10 @@ class TestModel:
         return tuple(cls.create_instance(data) for data in data_seq)
 
     @classmethod
+    def get_data_iter(cls, iter):
+        return (cls.create_data(fid=i) for i in iter)
+        
+    @classmethod
     def get_pk_set(cls):
         return set(instance.pk for instance in cls.Model.objects.all())
 
