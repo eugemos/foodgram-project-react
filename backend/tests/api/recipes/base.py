@@ -23,8 +23,8 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
     )
 
-    TAG_COUNT = 3
-    INGREDIENT_COUNT = 3
+    TAG_COUNT = 5
+    INGREDIENT_COUNT = 5
     tag_fids = nrange(1, TAG_COUNT)
     ingredient_fids = nrange(1, INGREDIENT_COUNT)
 
