@@ -1,13 +1,21 @@
 import re
 
+from django.shortcuts import get_object_or_404
 import django_filters.rest_framework as dj_filters
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Tag, Ingredient, Recipe
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
+from .serializers import (
+    TagSerializer, IngredientSerializer, 
+    RecipeSerializer, ReducedRecipeSerializer
+)
 from .filters import IngredientFilterSet
 from .permissions import RecipesPermission
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     """
@@ -64,7 +72,6 @@ class RecipeViewSet(ModelViewSet):
 
         return qs
 
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
     
@@ -73,3 +80,17 @@ class RecipeViewSet(ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
+
+    @action(detail=True, methods=['post'], serializer_class=ReducedRecipeSerializer)
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = request.user
+        if user.has_in_shopping_cart(recipe):
+            return Response(
+                dict(errors='Этот рецепт уже есть в этом списке.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.add_to_shopping_cart(recipe)
+        serializer = self.get_serializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

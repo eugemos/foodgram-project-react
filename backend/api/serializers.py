@@ -122,3 +122,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             instance.add_ingredient(occurence['ingredient'], occurence['amount'])
 
         return instance
+
+
+class ReducedRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'cooking_time', 'image')
+        read_only_fields = fields
