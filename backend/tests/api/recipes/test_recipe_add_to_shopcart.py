@@ -27,27 +27,40 @@ class RecipeAddToShopcartTestCase(RecipeEndpointTestCase):
         super().setUp()
         self.user_client = APIClient()
         self.user_client.force_authenticate(user=self.user)
-        # self.author_client = APIClient()
-        # self.author_client.force_authenticate(user=self.author)
-        self.check_db_not_changed()
+        self.assertEqual(self.user.shopping_cart.count(), 0)
 
     def test_auth_user_can_add_recipe_to_shopcart(self):
-        exp_response = self.create_exp_response_data(self.recipe, fid='test')
+        exp_response_data = self.create_exp_response_data(self.recipe, fid='test')
         self.do_request_and_check_response(
-            self.user_client, self.recipe.pk, exp_response, status.HTTP_201_CREATED
+            self.user_client, self.recipe.pk, exp_response_data,
+            status.HTTP_201_CREATED
         )
-        # self.assertEqual(self.Model.objects.count(), 0)
         self.assertEqual(self.user.shopping_cart.count(), 1)
         self.assertTrue(self.user.has_in_shopping_cart(self.recipe))
 
-    def check_request_fails(self, client, id, exp_response_data, exp_status):
+    def test_anon_user_cant_add_recipe_to_shopcart(self):
+        exp_response_data = self.UNAUTHORIZED_ERROR_RESPONSE_DATA
         self.do_request_and_check_response(
-            client, id, exp_response_data, exp_status
+            self.client, self.recipe.pk, exp_response_data,
+            status.HTTP_401_UNAUTHORIZED
         )
-        self.check_db_not_changed()
+        self.assertEqual(self.user.shopping_cart.count(), 0)
 
-    def check_db_not_changed(self): 
-        # self.assertEqual(self.Model.objects.count(), 1)
+    def test_auth_user_cant_add_recipe_to_shopcart_twice(self):
+        self.user.add_to_shopping_cart(self.recipe)
+        exp_response_data = dict(errors='Этот рецепт уже есть в этом списке.')
+        self.do_request_and_check_response(
+            self.user_client, self.recipe.pk, exp_response_data,
+            status.HTTP_400_BAD_REQUEST
+        )
+        self.assertEqual(self.user.shopping_cart.count(), 1)
+
+    def test_request_to_unexistent_recipe_fails(self):
+        exp_response_data = self.PAGE_NOT_FOUND_RESPONSE_DATA
+        self.do_request_and_check_response(
+            self.user_client, 10, exp_response_data,
+            status.HTTP_404_NOT_FOUND
+        )
         self.assertEqual(self.user.shopping_cart.count(), 0)
 
     @classmethod
