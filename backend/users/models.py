@@ -65,3 +65,7 @@ class User(AbstractUser):
 
     def add_to_shopping_cart(self, recipe):
         self.shopping_cart.add(recipe)
+
+    def remove_from_shopping_cart(self, recipe):
+        self.shopping_cart.remove(recipe)
+

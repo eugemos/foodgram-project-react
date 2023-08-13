@@ -81,7 +81,8 @@ class RecipeViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
-    @action(detail=True, methods=['post'], serializer_class=ReducedRecipeSerializer)
+    @action(detail=True, methods=['post'],
+            serializer_class=ReducedRecipeSerializer)
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
@@ -94,3 +95,16 @@ class RecipeViewSet(ModelViewSet):
         user.add_to_shopping_cart(recipe)
         serializer = self.get_serializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @shopping_cart.mapping.delete
+    def remove_from_shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = request.user
+        if user.has_in_shopping_cart(recipe):
+            user.remove_from_shopping_cart(recipe)
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+                dict(errors='Этого рецепта нет в этом списке.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
