@@ -15,12 +15,13 @@ class RecipeListTestCase(RecipeEndpointTestCase):
     AUTHOR_COUNT = 3
     author_fids = nrange(1, AUTHOR_COUNT)
     USER_SUBSCRIPTIONS = (2,)
-    USER_FAVORITES = (1, 3, 5)
-    USER_SHOPPING_CART = (2, 4, 6)
+    USER_FAVORITES = (1, 3, 5, 7)
+    USER_SHOPPING_CART = (2, 3, 4, 6, 7)
 
     @classmethod
     def get_author_fid(cls, recipe_fid):
-        return recipe_fid % cls.AUTHOR_COUNT + 1
+        r = recipe_fid % cls.AUTHOR_COUNT
+        return  r if r > 0 else cls.AUTHOR_COUNT
 
     @classmethod
     def setUpClass(cls):
@@ -60,9 +61,6 @@ class RecipeListTestCase(RecipeEndpointTestCase):
 
         assert self.Model.objects.count() == instance_count
 
-    # def test_fixtures(self):
-    #     self.prepare(instance_count=10, page_size=5)
-
     def test_list_action_without_params(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size, page_size=page_size)
@@ -88,6 +86,72 @@ class RecipeListTestCase(RecipeEndpointTestCase):
                     params=dict(limit=page_size, page=page)
                 )
 
+    def test_list_action_with_filter_params(self):
+        page_size = DEFAULT_PAGE_SIZE
+        self.prepare(instance_count=10, page_size=page_size)
+        tests = [
+            dict(
+                params={},
+                anon=nrange(1, page_size),
+                auth=nrange(1, page_size),
+            ),
+            dict(
+                params=dict(is_favorited=0, is_in_shopping_cart=0),
+                anon=nrange(1, page_size),
+                auth=nrange(1, page_size),
+            ),
+            dict(
+                params=dict(is_favorited=1),
+                anon=(),
+                auth=self.USER_FAVORITES,
+            ),
+            dict(
+                params=dict(is_in_shopping_cart=1),
+                anon=(),
+                auth=self.USER_SHOPPING_CART,
+            ),
+            dict(
+                params=dict(is_favorited=1, is_in_shopping_cart=1),
+                anon=(),
+                auth=(3, 7),
+            ),
+            dict(
+                params=dict(author=1),
+                anon=(1, 4, 7, 10),
+                auth=(1, 4, 7, 10),
+            ),
+            dict(
+                params=dict(author=''), #'a', '0', '20'
+                anon=(),
+                auth=(),
+            ),
+            dict(
+                params=dict(tags=['slug_3', 'slug_4', 'slug_5', ]),
+                anon=(7,),
+                auth=(7,),
+            ),
+            dict(
+                params=dict(tags='slug_2', author=2),
+                anon=(8,),
+                auth=(8,),
+            ),
+        ]
+
+        for test in tests:
+            params = test['params']
+            results = test.get('anon', None)
+            if results is not None:
+                with self.subTest(params=params, user='anon'):
+                    self.do_request_and_check_filtered_result(
+                        self.client, params, len(results), results
+                    )
+            results = test.get('auth', None)
+            if results is not None:
+                with self.subTest(params=params, user='auth'):
+                    self.do_request_and_check_filtered_result(
+                        self.user_client, params, len(results), results
+                    )
+        
     def perform_test(
         self, *, page, params=dict(), 
     ):
@@ -113,20 +177,7 @@ class RecipeListTestCase(RecipeEndpointTestCase):
                 page, params, self.USER_SUBSCRIPTIONS, self.USER_FAVORITES,
                 self.USER_SHOPPING_CART
             )
-        )
-
-    def perform_filter_test_for_user(
-        self, *,
-        # page,  
-        params=dict()
-    ):
-        self.do_request_and_check_filtered_result(
-            self.user_client,
-            params,
-            exp_count,
-            exp_result_ids
-        )
-   
+        )  
 
     def create_exp_response_data(
         self, page, params, subscribed, favorites, shopping_cart
@@ -168,4 +219,17 @@ class RecipeListTestCase(RecipeEndpointTestCase):
             client, 'get', self.BASE_URL, 
             request_data, exp_response_data, exp_status,
             follow=True
+        )
+
+    def do_request_and_check_filtered_result(
+        self, client, params, exp_count, exp_results
+    ):
+        response = client.get(self.BASE_URL, params, format='json', follow=True)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        response_data = response.json()
+        with self.subTest():
+            self.assertEqual(exp_count, response_data['count'])
+        self.assertEqual(
+            set(exp_results),
+            {item['id'] for item in response_data['results']}
         )
