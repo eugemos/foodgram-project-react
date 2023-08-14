@@ -81,33 +81,18 @@ class RecipeViewSet(ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
-    @action(detail=True, methods=['post'],
+    @action(detail=True, methods=[],
             serializer_class=ReducedRecipeSerializer)
     def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        user = request.user
-        if user.has_in_shopping_cart(recipe):
-            return Response(
-                dict(errors='Этот рецепт уже есть в этом списке.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        pass
 
-        user.add_to_shopping_cart(recipe)
-        serializer = self.get_serializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @shopping_cart.mapping.post
+    def add_to_shopping_cart(self, request, pk):
+        return self.add_to_list('shopping_cart', request, pk)
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        user = request.user
-        if user.has_in_shopping_cart(recipe):
-            user.remove_from_shopping_cart(recipe)
-            return Response(None, status=status.HTTP_204_NO_CONTENT)
-
-        return Response(
-                dict(errors='Этого рецепта нет в этом списке.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        return self.remove_from_list('shopping_cart', request, pk)
 
     @action(detail=True, methods=[],
             serializer_class=ReducedRecipeSerializer)
@@ -116,24 +101,30 @@ class RecipeViewSet(ModelViewSet):
 
     @favorite.mapping.post
     def add_to_favorites(self, request, pk):
+        return self.add_to_list('favorites', request, pk)
+
+    @favorite.mapping.delete
+    def remove_from_favorites(self, request, pk):
+        return self.remove_from_list('favorites', request, pk)
+
+    def add_to_list(self, list_name, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
-        if user.has_in_favore(recipe):
+        if user.has_in_list(list_name, recipe):
             return Response(
                 dict(errors='Этот рецепт уже есть в этом списке.'),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.add_to_favorites(recipe)
+        user.add_to_list(list_name, recipe)
         serializer = self.get_serializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @favorite.mapping.delete
-    def remove_from_favorites(self, request, pk):
+    def remove_from_list(self, list_name, request, pk):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
-        if user.has_in_favore(recipe):
-            user.remove_from_favorites(recipe)
+        if user.has_in_list(list_name, recipe):
+            user.remove_from_list(list_name, recipe)
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
         return Response(

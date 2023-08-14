@@ -45,6 +45,15 @@ class User(AbstractUser):
     def __str__(self):
         return f'{self.username} ({self.email})'
 
+    def has_in_list(self, list_name: str, obj):
+        return obj in getattr(self, list_name).all()
+
+    def add_to_list(self, list_name: str, obj):
+        getattr(self, list_name).add(obj)
+
+    def remove_from_list(self, list_name: str, obj):
+        getattr(self, list_name).remove(obj)
+
     def is_subscribed_to(self, user):
         return user in self.subscribed_to.all()
 
