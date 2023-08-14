@@ -113,7 +113,7 @@ class RecipeRemoveFromListTestCase(RecipeEndpointTestCase):
             status.HTTP_401_UNAUTHORIZED
         )
 
-    def check_auth_user_cant_remove_from_list_recipe_which_is_not_there(self):
+    def check_auth_user_cant_remove_from_list_recipe_is_not_there(self):
         exp_response_data = dict(errors='Этого рецепта нет в этом списке.')
         self.check_request_fails(
             self.user_client, self.recipe_other.pk, exp_response_data,

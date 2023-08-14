@@ -1,8 +1,5 @@
-# from django.conf import settings
 from rest_framework import status
-from rest_framework.test import APIClient
 
-from tests.base import TestUser
 from .recipe_lists import RecipeRemoveFromListTestCase
 
 
@@ -23,8 +20,8 @@ class RecipeRemoveFromShopcartTestCase(RecipeRemoveFromListTestCase):
     def test_anon_user_cant_remove_recipe_from_shopcart(self):
         self.check_anon_user_cant_remove_recipe_from_list()
 
-    def test_auth_user_cant_remove_from_shopcart_recipe_which_is_not_there(self):
-        self.check_auth_user_cant_remove_from_list_recipe_which_is_not_there()
+    def test_auth_user_cant_remove_from_shopcart_recipe_is_not_there(self):
+        self.check_auth_user_cant_remove_from_list_recipe_is_not_there()
 
     def test_request_to_unexistent_recipe_fails(self):
         self.check_request_to_unexistent_recipe_fails()
