@@ -128,3 +128,15 @@ class RecipeViewSet(ModelViewSet):
         serializer = self.get_serializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    @favorite.mapping.delete
+    def remove_from_favorites(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = request.user
+        if user.has_in_favore(recipe):
+            user.remove_from_favorites(recipe)
+            return Response(None, status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+                dict(errors='Этого рецепта нет в этом списке.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
