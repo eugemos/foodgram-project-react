@@ -108,3 +108,23 @@ class RecipeViewSet(ModelViewSet):
                 dict(errors='Этого рецепта нет в этом списке.'),
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=True, methods=[],
+            serializer_class=ReducedRecipeSerializer)
+    def favorite(self, request, pk):
+        pass
+
+    @favorite.mapping.post
+    def add_to_favorites(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = request.user
+        if user.has_in_favore(recipe):
+            return Response(
+                dict(errors='Этот рецепт уже есть в этом списке.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.add_to_favorites(recipe)
+        serializer = self.get_serializer(recipe)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
