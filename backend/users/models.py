@@ -51,6 +51,9 @@ class User(AbstractUser):
     def subscribe_to(self, user):
         self.subscribed_to.add(user)
 
+    def unsubscribe_from(self, user):
+        self.subscribed_to.remove(user)
+
     def set_subscriptions(self, users):
         self.subscribed_to.set(users)
 
@@ -59,6 +62,9 @@ class User(AbstractUser):
 
     def add_to_favorites(self, recipe):
         self.favorites.add(recipe)
+
+    def remove_from_favorites(self, recipe):
+        self.favorites.remove(recipe)
 
     def has_in_shopping_cart(self, recipe):
         return recipe in self.shopping_cart.all()
