@@ -25,7 +25,7 @@ class IngredientListTestCaseWithSearch(IngredientEndpointTestCase):
         cls.create_instances(range(1, cls.INSTANCE_COUNT + 1))
 
     def test_anon_request_with_search_param_ok(self):
-        search_value = self.NAME_PREFIX + '1'
+        search_value = self.NAME_PREFIX + '001'
         request_data = dict(name=search_value)
         exp_response_data = [
             self.get_instance_data(i)

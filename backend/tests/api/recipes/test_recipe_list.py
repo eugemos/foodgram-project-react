@@ -126,12 +126,12 @@ class RecipeListTestCase(RecipeEndpointTestCase):
                 auth=(),
             ),
             dict(
-                params=dict(tags=['slug_3', 'slug_4', 'slug_5', ]),
+                params=dict(tags=['slug_003', 'slug_004', 'slug_005', ]),
                 anon=(7,),
                 auth=(7,),
             ),
             dict(
-                params=dict(tags='slug_2', author=2),
+                params=dict(tags='slug_002', author=2),
                 anon=(8,),
                 auth=(8,),
             ),

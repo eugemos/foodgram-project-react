@@ -162,11 +162,12 @@ class TestUser(TestModel):
 
     @classmethod
     def create_data(cls, *, fid='test', **kwargs):
+        fids = format(fid % 1000, '03') if isinstance(fid, int) else str(fid)
         data = dict(
-            email=f'mail_{fid}@email.any',
-            username=f'user_{fid}',
-            first_name=f'first_name_{fid}',
-            last_name=f'last_name_{fid}',
+            email=f'mail_{fids}@email.any',
+            username=f'user_{fids}',
+            first_name=f'first_name_{fids}',
+            last_name=f'last_name_{fids}',
         )
         data.update(**kwargs)
         return data
@@ -178,13 +179,14 @@ class TestTag(TestModel):
     )
 
     @classmethod
-    def create_data(cls, *, fid=0, **kwargs):
-        fid = int(fid)
-        color = format(fid, '5>6x')
+    def create_data(cls, *, fid=1, **kwargs):
+        fids = format(fid % 1000, '03') if isinstance(fid, int) else str(fid)
+        fidn = fid if isinstance(fid, int) else hash(fid)
+        color = format(fidn % 2**20, '5>6x')
         data = dict(
-            name=f'name_{fid}',
+            name=f'name_{fids}',
             color=f'#{color}',
-            slug=f'slug_{fid}',
+            slug=f'slug_{fids}',
         )
         data.update(**kwargs)
         return data
@@ -198,9 +200,10 @@ class TestIngredient(TestModel):
 
     @classmethod
     def create_data(cls, *, fid='test', **kwargs):
+        fids = format(fid % 1000, '03') if isinstance(fid, int) else str(fid)
         data = dict(
-            name=f'{cls.NAME_PREFIX}{fid}_ingredient',
-            measurement_unit=f'measure_{fid}',
+            name=f'{cls.NAME_PREFIX}{fids}_ingredient',
+            measurement_unit=f'measure_{fids}',
         )
         data.update(**kwargs)
         return data
@@ -225,9 +228,10 @@ class TestRecipe(TestModel):
 
     @classmethod
     def create_data(cls, *, fid=1, **kwargs):
+        fids = format(fid % 1000, '03') if isinstance(fid, int) else str(fid)
         data = dict(
-            name=f'recipe_{fid}',
-            text=f'rext_{fid}',
+            name=f'recipe_{fids}',
+            text=f'rext_{fids}',
             cooking_time=fid if isinstance(fid, int) else (hash(fid) % 1000) + 1,
             # author & image отсутствуют - так надо!
         )
