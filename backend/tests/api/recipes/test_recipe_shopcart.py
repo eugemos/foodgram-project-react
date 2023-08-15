@@ -1,5 +1,8 @@
 from unittest import skip
 
+from rest_framework import status
+from rest_framework.test import APIClient
+
 from api.shopping_cart import ShoppingCart
 from tests.base import (
     nrange, get_nth_subset,
@@ -35,10 +38,31 @@ class RecipeShopcartTestCase(RecipeEndpointTestCase):
 
         assert cls.Model.objects.count() == cls.INSTANCE_COUNT
 
+    def setUp(self):
+        self.user_client = APIClient()
+        self.user_client.force_authenticate(self.user)
+
     @classmethod
     def create_shopcart(cls, user, shopcart):
             for id in shopcart:
                 user.add_to_shopping_cart(cls.Model.objects.get(id=id))
+
+    def test_auth_user_can_download_shopcart(self):
+        self.create_shopcart(self.user, self.USER_SHOPPING_CART)
+        exp_response_data = ShoppingCart(self.user).to_text().encode('utf-8')
+        self.do_request_and_check_response(self.user_client, (), status.HTTP_200_OK)
+        self.assertEqual('text/plain; charset=utf-8', self.response['Content-Type'])
+        self.assertEqual(
+            f'attachment; filename="shopping_cart_{self.user.id}.txt"',
+            self.response['Content-Disposition']
+        )
+        self.assertEqual(exp_response_data, self.response.content)
+
+    def test_anon_user_cant_download_shopcart(self):
+        exp_response_data = self.UNAUTHORIZED_ERROR_RESPONSE_DATA
+        self.do_request_and_check_response(
+            self.client, exp_response_data, status.HTTP_401_UNAUTHORIZED
+        )
 
     @skip('Это для ручной проверки')
     def test_shopcart_0(self):
@@ -53,3 +77,11 @@ class RecipeShopcartTestCase(RecipeEndpointTestCase):
         cart = ShoppingCart(user)
         with open(f'shopcart_{file_no:03}.txt', 'w') as file:
             file.write(cart.to_text())
+
+    def do_request_and_check_response(
+        self, client, exp_response_data, exp_status, **kwargs
+    ):
+        return super().do_request_and_check_response(
+            client, 'get', f'{self.BASE_URL}download_shopping_cart/', None, 
+            exp_response_data, exp_status, **kwargs
+        )
