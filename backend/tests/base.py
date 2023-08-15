@@ -10,7 +10,10 @@ from api.models import Tag, Ingredient, Recipe
 TEST_HOST = 'http://testserver'
 DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
 
+def nrange(start, length):
+    return range(start, start+length)
 
+    
 class EndpointTestCase(APITestCase):
     FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
     NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
@@ -53,6 +56,19 @@ class EndpointTestCase(APITestCase):
         with self.subTest():
             self.assertEqual(exp_response_data, response_data)
         return response_data        
+
+
+class TagsIngredientsMixin:
+    TAG_COUNT = 5
+    INGREDIENT_COUNT = 5
+    tag_fids = nrange(1, TAG_COUNT)
+    ingredient_fids = nrange(1, INGREDIENT_COUNT)
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.tags = TestTag.create_instances(cls.tag_fids)
+        cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
 
 
 class TestSimpleListMixin:
@@ -265,9 +281,6 @@ def left_extend_str(s, dest_size, char='q'):
 
 def db_is_sqlite():
     return settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3'
-
-def nrange(start, length):
-    return range(start, start+length)
 
 def get_nth_subset(sec, n):
     sec_len = len(sec)

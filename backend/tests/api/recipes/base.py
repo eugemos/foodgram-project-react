@@ -5,14 +5,16 @@ from rest_framework import status
 
 from tests.base import (
     TEST_HOST, nrange,
-    EndpointTestCase, TestRecipe, TestTag, TestIngredient, TestUser
+    EndpointTestCase, TagsIngredientsMixin,
+    TestRecipe, TestTag, TestIngredient, TestUser
 )
 
 
 BASE64_PREFIX = 'data:image/png;base64,'
 TEST_DATA_ROOT = settings.BASE_DIR / 'tests' / 'data'
+  
 
-class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
+class RecipeEndpointTestCase(TagsIngredientsMixin, EndpointTestCase, TestRecipe):
     BASE_URL = '/api/recipes/'
     INPUT_FIELDS = (
         'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
@@ -22,16 +24,6 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
         'is_in_shopping_cart', 'name', 'image', 'text', 'cooking_time',
     )
 
-    TAG_COUNT = 5
-    INGREDIENT_COUNT = 5
-    tag_fids = nrange(1, TAG_COUNT)
-    ingredient_fids = nrange(1, INGREDIENT_COUNT)
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.tags = TestTag.create_instances(cls.tag_fids)
-        cls.ingredients = TestIngredient.create_instances(cls.ingredient_fids)
 
     @classmethod
     def ingredient_occurences_iter(cls, fids):
