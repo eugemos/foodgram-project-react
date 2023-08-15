@@ -1,3 +1,5 @@
+from unittest import skip
+
 from api.shopping_cart import ShoppingCart
 from tests.base import (
     nrange, get_nth_subset,
@@ -38,14 +40,15 @@ class RecipeShopcartTestCase(RecipeEndpointTestCase):
             for id in shopcart:
                 user.add_to_shopping_cart(cls.Model.objects.get(id=id))
 
-
+    @skip('Это для ручной проверки')
     def test_shopcart_0(self):
-        self.check_shopcart_creation(self.user, (), 0)
+        self.check_shopcart_text(self.user, (), 0)
 
+    @skip('Это для ручной проверки')
     def test_shopcart(self):
-        self.check_shopcart_creation(self.user, self.USER_SHOPPING_CART, 1)
+        self.check_shopcart_text(self.user, self.USER_SHOPPING_CART, 1)
 
-    def check_shopcart_creation(self, user, shopcart, file_no):
+    def check_shopcart_text(self, user, shopcart, file_no):
         self.create_shopcart(user, shopcart)
         cart = ShoppingCart(user)
         with open(f'shopcart_{file_no:03}.txt', 'w') as file:
