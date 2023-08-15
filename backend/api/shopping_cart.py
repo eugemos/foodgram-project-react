@@ -23,6 +23,9 @@ class ShoppingCart:
                     self.cart[key] = Ingredient(occurence)
 
     def to_text(self):
-        lines = [str(ingredient) for ingredient in self.cart.values()]
-        lines.append('')
-        return '\n'.join(lines)
+        if self.cart:
+            lines = [str(ingredient) for ingredient in self.cart.values()]
+            lines.append('')
+            return '\n'.join(lines)
+
+        return 'Ваш список покупок пуст.\n'

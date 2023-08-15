@@ -5,7 +5,7 @@ from tests.base import (
 )
 from .base import RecipeEndpointTestCase
 
-class RecipeSoppingCartTestCase(RecipeEndpointTestCase):
+class RecipeShopcartTestCase(RecipeEndpointTestCase):
     INSTANCE_COUNT = 10
     AUTHOR_COUNT = 3
     author_fids = nrange(1, AUTHOR_COUNT)
@@ -30,12 +30,23 @@ class RecipeSoppingCartTestCase(RecipeEndpointTestCase):
             tags = get_nth_subset(cls.tags, fid)
             ingredients = get_nth_subset(cls.ingredients, fid)
             recipe=cls.create_recipe(fid, author, tags, ingredients)
-            if fid in cls.USER_SHOPPING_CART:
-                cls.user.add_to_shopping_cart(recipe)
 
         assert cls.Model.objects.count() == cls.INSTANCE_COUNT
 
+    @classmethod
+    def create_shopcart(cls, user, shopcart):
+            for id in shopcart:
+                user.add_to_shopping_cart(cls.Model.objects.get(id=id))
+
+
+    def test_shopcart_0(self):
+        self.check_shopcart_creation(self.user, (), 0)
+
     def test_shopcart(self):
-        cart = ShoppingCart(self.user)
-        with open('1.txt', 'w') as file:
+        self.check_shopcart_creation(self.user, self.USER_SHOPPING_CART, 1)
+
+    def check_shopcart_creation(self, user, shopcart, file_no):
+        self.create_shopcart(user, shopcart)
+        cart = ShoppingCart(user)
+        with open(f'shopcart_{file_no:03}.txt', 'w') as file:
             file.write(cart.to_text())
