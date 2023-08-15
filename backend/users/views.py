@@ -1,4 +1,4 @@
-from djoser.views import TokenCreateView
+from djoser.views import TokenCreateView, UserViewSet as DjoserUserViewSet
 from rest_framework import status
 
 
@@ -9,3 +9,7 @@ class GetTokenView(TokenCreateView):
             response.status_code = status.HTTP_201_CREATED
 
         return response
+
+
+class UserViewSet(DjoserUserViewSet):
+    pass
