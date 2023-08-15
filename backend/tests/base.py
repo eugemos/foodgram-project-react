@@ -13,7 +13,7 @@ DEFAULT_PAGE_SIZE = settings.REST_FRAMEWORK['PAGE_SIZE']
 def nrange(start, length):
     return range(start, start+length)
 
-    
+
 class EndpointTestCase(APITestCase):
     FIELD_REQUIRED_ERROR_MESSAGE = 'Обязательное поле.'
     NULL_FIELD_DISALLOWED_ERROR_MESSAGE = 'Это поле не может быть пустым.'
@@ -274,7 +274,14 @@ class TestRecipe(TestModel):
         )
         data.update(**kwargs)
         return data
- 
+
+    @classmethod
+    def get_image_url(cls, *, instance=None, pk=0):
+        if instance is None:
+            instance = cls.Model.objects.get(pk=pk)
+
+        return f'{TEST_HOST}{settings.MEDIA_URL}{instance.image.name}'
+        
     
 def left_extend_str(s, dest_size, char='q'):
     return char * (dest_size - len(s)) + s
