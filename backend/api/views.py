@@ -1,5 +1,6 @@
 import re
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import django_filters.rest_framework as dj_filters
 from rest_framework import status
@@ -15,6 +16,8 @@ from .serializers import (
 )
 from .filters import IngredientFilterSet
 from .permissions import RecipesPermission
+from .shopping_cart import ShoppingCart
+
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -131,3 +134,17 @@ class RecipeViewSet(ModelViewSet):
                 dict(errors='Этого рецепта нет в этом списке.'),
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=False, methods=['get'],
+            permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        user = request.user
+        cart = ShoppingCart(user)
+        return HttpResponse(
+            cart.to_text(),
+            headers={
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Disposition':
+                    f'attachment; filename="shopping_cart_{user.id}.txt"',
+            }
+        )
