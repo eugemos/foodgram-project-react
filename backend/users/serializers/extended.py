@@ -4,7 +4,7 @@ from api.serializers import ReducedRecipeSerializer
 from .base import UserSerializer
 
 class ExtendedUserSerializer(UserSerializer):
-    recipes = ReducedRecipeSerializer(read_only=True)
+    recipes = ReducedRecipeSerializer(read_only=True, many=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):

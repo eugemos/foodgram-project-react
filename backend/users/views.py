@@ -3,6 +3,7 @@ from djoser.views import TokenCreateView, UserViewSet as DjoserUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import User
 from .serializers.extended import ExtendedUserSerializer
@@ -21,8 +22,8 @@ class UserViewSet(DjoserUserViewSet):
 
     @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
             permission_classes=[IsAuthenticated])
-    def subscribe(self, request, pk):
-        author = get_object_or_404(User, pk=pk)
+    def subscribe(self, request, id):
+        author = get_object_or_404(User, pk=id)
         if request.user == author:
             return Response(
                 dict(errors='Нельзя подписаться на самого себя.'),
