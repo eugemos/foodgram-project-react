@@ -16,10 +16,10 @@ class RecipeAddToListTestCase(RecipeEndpointTestCase):
         super().setUpClass()
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
-        cls.recipe = cls.create_recipe(
+        cls.recipe = cls.create_instance(
             'test', cls.author, cls.tags, cls.ingredients
         )
-        cls.recipe_other = cls.create_recipe(
+        cls.recipe_other = cls.create_instance(
             'other', cls.user, cls.tags, cls.ingredients
         )
 
@@ -87,10 +87,10 @@ class RecipeRemoveFromListTestCase(RecipeEndpointTestCase):
         super().setUpClass()
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
-        cls.recipe = cls.create_recipe(
+        cls.recipe = cls.create_instance(
             'test', cls.author, cls.tags, cls.ingredients
         )
-        cls.recipe_other = cls.create_recipe(
+        cls.recipe_other = cls.create_instance(
             'other', cls.user, cls.tags, cls.ingredients
         )
 

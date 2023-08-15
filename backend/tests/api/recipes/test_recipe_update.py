@@ -38,7 +38,7 @@ class RecipeUpdateTestCase(
         new_ingredients = TestIngredient.create_instances(cls.new_ingredient_fids)
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
-        cls.recipe = cls.create_recipe(
+        cls.recipe = cls.create_instance(
             'old', cls.author, cls.tags, cls.ingredients
         )
 

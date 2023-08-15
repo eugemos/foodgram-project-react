@@ -17,7 +17,7 @@ class RecipeDetailEndpointTestCase(RecipeEndpointTestCase):
         super().setUpClass()
         cls.author = TestUser.create_instance('author')
         cls.client_user = TestUser.create_instance('client')
-        cls.recipe = cls.create_recipe(
+        cls.recipe = cls.create_instance(
             'any', cls.author, cls.tags, cls.ingredients
         )
 

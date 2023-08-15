@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files import File
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
 
 from api.models import Tag, Ingredient, Recipe
 
@@ -29,6 +30,11 @@ class EndpointTestCase(APITestCase):
     UNAUTHORIZED_ERROR_RESPONSE_DATA = dict(detail=UNAUTHORIZED_ERROR_MESSAGE)
     FORBIDDEN_ERROR_RESPONSE_DATA = dict(detail=FORBIDDEN_ERROR_MESSAGE)
     PAGE_NOT_FOUND_RESPONSE_DATA = dict(detail=PAGE_NOT_FOUND_ERROR_MESSAGE)
+
+    def create_auth_client(self, user):
+        auth_client = APIClient()
+        auth_client.force_authenticate(user=user)
+        return auth_client
 
     def do_request_and_check_response(
         self, client, method, url, request_data, 
@@ -212,6 +218,21 @@ class TestIngredient(TestModel):
 class TestRecipe(TestModel):
     Model = Recipe
     INSTANCE_FIELDS = ('id', 'name', 'text', 'cooking_time', 'author')
+
+    @classmethod
+    def create_instance(
+        cls, fid, author, tags, ingredients, image='test.png'
+    ):
+        recipe = super().create_instance(
+            fid,
+            author=author,
+            image=File(open(f'tests/data/{image}'), name='recipe.png'),
+        )
+        recipe.set_tags(tags)
+        for ingredient in ingredients:
+            recipe.add_ingredient(ingredient, ingredient.pk)
+
+        return recipe
 
     @classmethod
     def get_instance_data(cls, instance, **kwargs):

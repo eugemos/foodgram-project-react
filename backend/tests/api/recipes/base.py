@@ -1,7 +1,6 @@
 from base64 import b64encode
 
 from django.conf import settings
-from django.core.files import File
 from rest_framework import status
 
 from tests.base import (
@@ -37,21 +36,6 @@ class RecipeEndpointTestCase(EndpointTestCase, TestRecipe):
     @classmethod
     def ingredient_occurences_iter(cls, fids):
         return (dict(id=fid, amount=fid) for fid in fids)
-
-    @classmethod
-    def create_recipe(
-        cls, fid, author, tags, ingredients, image='test.png'
-    ):
-        recipe = cls.create_instance(
-            fid,
-            author=author,
-            image=File(open(f'tests/data/{image}'), name='recipe.png'),
-        )
-        recipe.set_tags(tags)
-        for ingredient in ingredients:
-            recipe.add_ingredient(ingredient, ingredient.pk)
-
-        return recipe
 
     @classmethod
     def create_request_data(

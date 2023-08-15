@@ -34,7 +34,7 @@ class RecipeShopcartTestCase(RecipeEndpointTestCase):
             author = TestUser.Model.objects.get(id=cls.get_author_fid(fid))
             tags = get_nth_subset(cls.tags, fid)
             ingredients = get_nth_subset(cls.ingredients, fid)
-            recipe=cls.create_recipe(fid, author, tags, ingredients)
+            recipe=cls.create_instance(fid, author, tags, ingredients)
 
         assert cls.Model.objects.count() == cls.INSTANCE_COUNT
 

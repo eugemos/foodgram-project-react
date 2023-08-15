@@ -53,7 +53,7 @@ class RecipeListTestCase(RecipeEndpointTestCase):
             author = TestUser.Model.objects.get(id=self.get_author_fid(fid))
             tags = get_nth_subset(self.tags, fid)
             ingredients = get_nth_subset(self.ingredients, fid)
-            recipe=self.create_recipe(fid, author, tags, ingredients)
+            recipe=self.create_instance(fid, author, tags, ingredients)
             if fid in user_favorites:
                 self.user.add_to_favorites(recipe)
             if fid in user_shopping_cart:

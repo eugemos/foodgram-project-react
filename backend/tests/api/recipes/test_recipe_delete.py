@@ -8,14 +8,14 @@ from tests.base import (
 from .base import RecipeEndpointTestCase
 
 
-class RecipeDeleteEndpointTestCase(RecipeEndpointTestCase):
+class RecipeDeleteTestCase(RecipeEndpointTestCase):
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.author = TestUser.create_instance('author')
         cls.user = TestUser.create_instance('user')
-        cls.recipe = cls.create_recipe(
+        cls.recipe = cls.create_instance(
             'any', cls.author, cls.tags, cls.ingredients
         )
         cls.user.add_to_favorites(cls.recipe)
