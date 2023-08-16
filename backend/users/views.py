@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from api.paginators import Pagination
 from .models import User
 from .serializers.extended import ExtendedUserSerializer
 
@@ -19,6 +20,18 @@ class GetTokenView(TokenCreateView):
 
 
 class UserViewSet(DjoserUserViewSet):
+
+    def get_queryset(self):
+        if hasattr(self, 'do_get_subscriptions'):
+            return self.request.user.subscribed_to.all()
+        
+        return super().get_queryset()
+
+    @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        self.do_get_subscriptions = True
+        return self.list(request)
 
     @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
             permission_classes=[IsAuthenticated])
