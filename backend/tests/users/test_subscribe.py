@@ -49,11 +49,14 @@ class UserSubscribeTestCase(TagsIngredientsMixin, UserEndpointTestCase):
         recipes_limit = self.RECIPE_COUNT + 1
         self.check_auth_request_ok(f'?recipes_limit={recipes_limit}', self.RECIPE_COUNT)
     
-    def test_auth_user_can_subscribe_to_author_with_params_1(self):
+    def test_auth_user_can_subscribe_to_author_with_zero_param(self):
         self.check_auth_request_ok(f'?recipes_limit={0}', self.RECIPE_COUNT)
 
-    def test_auth_user_can_subscribe_to_author_with_params_1(self):
+    def test_auth_user_can_subscribe_to_author_with_empty_param(self):
         self.check_auth_request_ok('?recipes_limit', self.RECIPE_COUNT)
+
+    def test_auth_user_can_subscribe_to_author_with_invalid_param(self):
+        self.check_auth_request_ok('?recipes_limit=xxx', self.RECIPE_COUNT)
 
     def check_auth_request_ok(self, request_data, exp_recipe_count):
         exp_response_data = self.create_data(
