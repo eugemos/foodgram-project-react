@@ -42,3 +42,18 @@ class UserViewSet(DjoserUserViewSet):
             serializer.data,
             status=status.HTTP_201_CREATED
         )
+
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, id):
+        author = get_object_or_404(User, pk=id)
+        if not request.user.is_subscribed_to(author):
+            return Response(
+                dict(errors='Вы не подписаны на этого автора.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        request.user.unsubscribe_from(author)
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
+
