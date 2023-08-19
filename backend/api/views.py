@@ -70,8 +70,11 @@ class RecipeViewSet(ModelViewSet):
             else:
                 qs = qs.none()
 
-        for tag in self.request.query_params.getlist('tags'):
-            qs = qs.filter(tags__slug=tag)
+        # for tag in self.request.query_params.getlist('tags'):
+        #     qs = qs.filter(tags__slug=tag)
+        tags = self.request.query_params.getlist('tags')
+        if tags:
+            qs = qs.filter(tags__slug__in=tags).distinct()
 
         return qs
 

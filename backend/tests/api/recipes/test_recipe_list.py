@@ -61,6 +61,13 @@ class RecipeListTestCase(RecipeEndpointTestCase):
 
         assert self.Model.objects.count() == instance_count
 
+    def _test_tag_filtering(self):
+        self.prepare(instance_count=10, page_size=10)
+        f = self.Model.objects.filter(tags__slug__in=['slug_004','slug_005']).distinct()
+        res = [recipe.id for recipe in f]
+        self.assertEqual([1,2,3,5,6,7,9,10], res)
+
+
     def test_list_action_without_params(self):
         page_size = DEFAULT_PAGE_SIZE
         self.prepare(instance_count=page_size, page_size=page_size)
@@ -127,8 +134,8 @@ class RecipeListTestCase(RecipeEndpointTestCase):
             ),
             dict(
                 params=dict(tags=['slug_003', 'slug_004', 'slug_005', ]),
-                anon=(7,),
-                auth=(7,),
+                anon=(1,2,3,4,5,6,7,9,10),
+                auth=(1,2,3,4,5,6,7,9,10),
             ),
             dict(
                 params=dict(tags='slug_002', author=2),
