@@ -18,7 +18,7 @@ class Tag(models.Model):
         verbose_name_plural = 'теги'
 
     def __str__(self):
-        return f'{self.slug}'
+        return f'{self.name}'
 
 
 class Ingredient(models.Model):
@@ -98,4 +98,4 @@ class IngredientOccurence(models.Model):
         verbose_name_plural = 'использования ингредиентов'
 
     def __str__(self):
-        return f'{self.ingredient} --> {self.recipe}'
+        return f'{self.ingredient} в {self.recipe}'

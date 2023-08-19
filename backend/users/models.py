@@ -20,18 +20,21 @@ class User(AbstractUser):
         'api.Recipe',
         related_name='in_favore',
         verbose_name='Избранные рецепты',
+        blank=True,
     )
     shopping_cart = models.ManyToManyField(
         'api.Recipe',
         db_table='ShoppingCart',
         related_name='in_shopping_cart',
         verbose_name='Список покупок',
+        blank=True,
     )
     subscribed_to=models.ManyToManyField(
         'self',
         related_name='subscribers',
         symmetrical=False,
-        verbose_name='Подписки'
+        verbose_name='Подписки',
+        blank=True,
     )
 
     USERNAME_FIELD = 'email'
