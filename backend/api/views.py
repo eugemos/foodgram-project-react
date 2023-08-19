@@ -19,7 +19,6 @@ from .permissions import RecipesPermission
 from .shopping_cart import ShoppingCart
 
 
-
 class TagViewSet(ReadOnlyModelViewSet):
     """
     A simple ViewSet for viewing tags.
@@ -70,8 +69,6 @@ class RecipeViewSet(ModelViewSet):
             else:
                 qs = qs.none()
 
-        # for tag in self.request.query_params.getlist('tags'):
-        #     qs = qs.filter(tags__slug=tag)
         tags = self.request.query_params.getlist('tags')
         if tags:
             qs = qs.filter(tags__slug__in=tags).distinct()
