@@ -1,3 +1,4 @@
+"""Содержит обработчики для эндпойнтов приложения api."""
 import re
 
 from django.http import HttpResponse
@@ -20,18 +21,14 @@ from .shopping_cart import ShoppingCart
 
 
 class TagViewSet(ReadOnlyModelViewSet):
-    """
-    A simple ViewSet for viewing tags.
-    """
+    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Теги'."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
-    """
-    A simple ViewSet for viewing ingredients.
-    """
+    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Ингредиенты'."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
@@ -40,14 +37,19 @@ class IngredientViewSet(ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
-    """
-    ViewSet for viewing receipes.
+    """Набор обработчиков, обеспечивающих доступ к ресурсам:
+    - 'Рецепты';
+    - 'Список покупок';
+    - 'Избранное'.
     """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (RecipesPermission,)
 
     def get_queryset(self):
+        """Возвращает кверисет для доступа к ресурсу 'Рецепты'
+        с учётом параметров строки запроса.
+        """
         user = self.request.user
         qs = super().get_queryset()
         if self.request.query_params.get('is_favorited', 0) == '1':
@@ -76,41 +78,59 @@ class RecipeViewSet(ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
+        """Выполняет операцию создания рецепта."""
         serializer.save(author=self.request.user)
     
     def perform_update(self, serializer):
+        """Выполняет операцию изменения рецепта."""
         serializer.save(author=self.request.user)
 
     def partial_update(self, request, *args, **kwargs):
+        """Выполняет операцию частичного изменения рецепта."""
         return self.update(request, *args, **kwargs)
 
     @action(detail=True, methods=[],
             serializer_class=ReducedRecipeSerializer)
     def shopping_cart(self, request, pk):
+        """Обеспечивает общий доступ к ресурсу 'Список покупок'."""
         pass
 
     @shopping_cart.mapping.post
     def add_to_shopping_cart(self, request, pk):
+        """Обеспечивает выполнение операции
+        'Добавить рецепт в список покупок'.
+        """
         return self.add_to_list('shopping_cart', request, pk)
 
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk):
+        """Обеспечивает выполнение операции
+        'Удалить рецепт из списка покупок'.
+        """
         return self.remove_from_list('shopping_cart', request, pk)
 
     @action(detail=True, methods=[],
             serializer_class=ReducedRecipeSerializer)
     def favorite(self, request, pk):
+        """Обеспечивает общий доступ к ресурсу 'Избранное'."""
         pass
 
     @favorite.mapping.post
     def add_to_favorites(self, request, pk):
+        """Обеспечивает выполнение операции
+        'Добавить рецепт в избранное'.
+        """
         return self.add_to_list('favorites', request, pk)
 
     @favorite.mapping.delete
     def remove_from_favorites(self, request, pk):
+        """Обеспечивает выполнение операции
+        'Удалить рецепт из избранного'.
+        """
         return self.remove_from_list('favorites', request, pk)
 
     def add_to_list(self, list_name, request, pk):
+        """Выполняет операцию добавления рецепта в список."""
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         if user.has_in_list(list_name, recipe):
@@ -124,6 +144,7 @@ class RecipeViewSet(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, list_name, request, pk):
+        """Выполняет операцию удаления рецепта из списка."""
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
         if user.has_in_list(list_name, recipe):
@@ -138,6 +159,7 @@ class RecipeViewSet(ModelViewSet):
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
+        """Обеспечивает выполнение операции 'Скачать список покупок'."""
         user = request.user
         cart = ShoppingCart(user)
         return HttpResponse(

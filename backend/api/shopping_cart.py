@@ -1,10 +1,18 @@
+"""Содержит классы, отвечающие за формирование списка покупок в текстовом
+виде.
+"""
+
+
 class Ingredient:
+    """Представляет ингредиент в списке покупок."""
     def __init__(self, occurence):
+        """Инициализирует ингредиент в списке покупок."""
         self.name = occurence.ingredient.name
         self.measurement_unit = occurence.ingredient.measurement_unit
         self.amount = occurence.amount
 
     def add_amount(self, occurence):
+        """Увеличивает количество ингредиента в списке покупок."""
         self.amount += occurence.amount
 
     def __str__(self):
@@ -12,7 +20,11 @@ class Ingredient:
 
 
 class ShoppingCart:
+    """Представляет список покупок."""
     def __init__(self, user):
+        """Создаёт список покупок на основании поля shopping_cart объекта
+        модели User.
+        """
         self.cart = {}
         for recipe in user.shopping_cart.all():
             for occurence in recipe.ingredients.all():
@@ -23,6 +35,7 @@ class ShoppingCart:
                     self.cart[key] = Ingredient(occurence)
 
     def to_text(self):
+        """Создаёт текстовое представление списка покупок."""
         if self.cart:
             lines = [str(ingredient) for ingredient in self.cart.values()]
             lines.append('')

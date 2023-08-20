@@ -1,3 +1,4 @@
+"""Содержит сериализаторы, используемые приложением api."""
 from base64 import b64decode
 
 from django.core.files.base import ContentFile
@@ -9,6 +10,7 @@ from .models import Tag, Ingredient, Recipe, IngredientOccurence
 
 
 class Base64ImageField(serializers.FileField):
+    """Поле для представления файла, загружаемого на сайт в формате base64."""
     file_name_base = 'image'
 
     def to_internal_value(self, data):
@@ -24,22 +26,26 @@ class Base64ImageField(serializers.FileField):
 
 
 class RecipeImageField(Base64ImageField):
+    """Поле для представления иллюстрации к рецепту."""
     file_name_base = 'recipe'
 
 
 class TagSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Tag."""
     class Meta:
         model = Tag
         fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Ingredient."""
     class Meta:
         model = Ingredient
         fields = '__all__'
 
 
 class IngredientOccurenceSerialiser(serializers.ModelSerializer):
+    """Сериализатор для модели IngredientOccurence."""
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient', queryset=Ingredient.objects.all()
     )
@@ -59,6 +65,7 @@ class IngredientOccurenceSerialiser(serializers.ModelSerializer):
 
 
 class TagField(serializers.PrimaryKeyRelatedField):
+    """Поле для представления модели Tag в составе других объектов."""
     def to_representation(self, instance):
         if isinstance(instance, Tag):
             return dict(
@@ -72,6 +79,7 @@ class TagField(serializers.PrimaryKeyRelatedField):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Recipe."""
     image = RecipeImageField(required=True)
     tags = TagField(
         required=True, many=True, allow_empty=False, queryset=Tag.objects.all()
@@ -95,14 +103,17 @@ class RecipeSerializer(serializers.ModelSerializer):
         }
 
     def get_is_favorited(self, recipe):
+        """Возвращает значение для поля is_favorited."""
         client_user = self.context['request'].user
         return client_user.is_authenticated and client_user.has_in_favore(recipe)
 
     def get_is_in_shopping_cart(self, recipe):
+        """Возвращает значение для поля is_in_shopping_cart."""
         client_user = self.context['request'].user
         return client_user.is_authenticated and client_user.has_in_shopping_cart(recipe)
 
     def create(self, validated_data):
+        """Создаёт объект типа Recipe."""
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
@@ -113,6 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
+        """Изменяет объект типа Recipe."""
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance = super().update(instance, validated_data)
@@ -125,7 +137,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class ReducedRecipeSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для представления модели Recipe в составе других
+    объектов.
+    """
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')

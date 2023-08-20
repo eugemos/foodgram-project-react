@@ -1,8 +1,11 @@
+"""Содержит модели, используемые приложением api."""
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.db import models
 
+
 class Tag(models.Model):
+    """Модель тега."""
     name = models.CharField('Название', max_length=150, unique=True)
     color = models.CharField(
         'Цветовой HEX-код', max_length=7, unique=True,
@@ -22,6 +25,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """Модель ингредиента."""
     name = models.CharField('Название', max_length=150)
     measurement_unit = models.CharField('Единица измерения', max_length=20)
 
@@ -35,6 +39,7 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    """Модель рецепта."""
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     name = models.CharField('Название', max_length=200)
     text = models.TextField('Описание')
@@ -53,12 +58,6 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Теги',
     )
-    # ingredients = models.ManyToManyField(
-    #     Ingredient,
-    #     related_name='recipes',
-    #     verbose_name='Ингредиенты',
-    #     through='IngredientOccurence',
-    # )
 
     class Meta:
         # ordering = ['-pub_date']
@@ -70,15 +69,18 @@ class Recipe(models.Model):
         return f'{self.name}'
 
     def add_ingredient(self, ingredient, amount):
+        """Добавляет ингредиент в рецепт."""
         IngredientOccurence.objects.create(
             recipe=self, ingredient=ingredient, amount=amount
         )
 
     def set_tags(self, tags):
+        """Устанавливает набор тегов для рецепта."""
         self.tags.set(tags)
 
 
 class IngredientOccurence(models.Model):
+    """Модель, представляющая вхождение ингредиента в рецепт."""
     amount = models.PositiveSmallIntegerField('Количество')
     ingredient = models.ForeignKey(
         Ingredient,

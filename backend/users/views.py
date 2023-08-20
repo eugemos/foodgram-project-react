@@ -1,3 +1,4 @@
+"""Содержит обработчики для эндпойнтов приложения users."""
 from django.shortcuts import get_object_or_404
 from djoser.views import TokenCreateView, UserViewSet as DjoserUserViewSet
 from rest_framework import status
@@ -11,6 +12,7 @@ from .serializers.extended import ExtendedUserSerializer
 
 
 class GetTokenView(TokenCreateView):
+    """Обработчик эндпойнта 'Получить токен авторизации'."""
     def post(self, *args, **kwargs):
         response = super().post(*args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
@@ -20,7 +22,10 @@ class GetTokenView(TokenCreateView):
 
 
 class UserViewSet(DjoserUserViewSet):
-
+    """Набор обработчиков, обеспечивающих доступ к ресурсам:
+    - 'Пользователи';
+    - 'Подписки'.
+    """
     def get_queryset(self):
         if hasattr(self, 'do_get_subscriptions'):
             return self.request.user.subscribed_to.all()
@@ -30,12 +35,14 @@ class UserViewSet(DjoserUserViewSet):
     @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
+        """Обработчик эндпойнта 'Мои подписки'."""
         self.do_get_subscriptions = True
         return self.list(request)
 
     @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
+        """Обработчик эндпойнта 'Подписаться на пользователя'."""
         author = get_object_or_404(User, pk=id)
         if request.user == author:
             return Response(
@@ -58,6 +65,7 @@ class UserViewSet(DjoserUserViewSet):
 
     @subscribe.mapping.delete
     def unsubscribe(self, request, id):
+        """Обработчик эндпойнта 'Отписаться от пользователя'."""
         author = get_object_or_404(User, pk=id)
         if not request.user.is_subscribed_to(author):
             return Response(
@@ -69,4 +77,3 @@ class UserViewSet(DjoserUserViewSet):
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )
-

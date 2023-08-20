@@ -1,4 +1,4 @@
-"""Функции отображения кастомных страниц для ошибок."""
+"""Содержит функции отображения кастомных страниц для ошибок."""
 from django.shortcuts import render
 from rest_framework import status
 
