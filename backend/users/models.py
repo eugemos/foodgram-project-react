@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 MAX_PASSWORD_LENGTH = 150
 
+
 class User(AbstractUser):
     """Модель пользователя сайта."""
     password = models.CharField(_('password'), max_length=MAX_PASSWORD_LENGTH)
@@ -31,7 +32,7 @@ class User(AbstractUser):
         verbose_name='Список покупок',
         blank=True,
     )
-    subscribed_to=models.ManyToManyField(
+    subscribed_to = models.ManyToManyField(
         'self',
         related_name='subscribers',
         symmetrical=False,

@@ -12,7 +12,7 @@ from rest_framework.response import Response
 
 from .models import Tag, Ingredient, Recipe
 from .serializers import (
-    TagSerializer, IngredientSerializer, 
+    TagSerializer, IngredientSerializer,
     RecipeSerializer, ReducedRecipeSerializer
 )
 from .filters import IngredientFilterSet
@@ -66,7 +66,7 @@ class RecipeViewSet(ModelViewSet):
 
         if 'author' in self.request.query_params:
             author_id = self.request.query_params['author']
-            if re.fullmatch('\d+', author_id):
+            if re.fullmatch(r'\d+', author_id):
                 qs = qs.filter(author__id=author_id)
             else:
                 qs = qs.none()
@@ -80,7 +80,7 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         """Выполняет операцию создания рецепта."""
         serializer.save(author=self.request.user)
-    
+
     def perform_update(self, serializer):
         """Выполняет операцию изменения рецепта."""
         serializer.save(author=self.request.user)
@@ -152,9 +152,9 @@ class RecipeViewSet(ModelViewSet):
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
         return Response(
-                dict(errors='Этого рецепта нет в этом списке.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            dict(errors='Этого рецепта нет в этом списке.'),
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])

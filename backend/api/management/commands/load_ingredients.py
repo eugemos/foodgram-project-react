@@ -1,5 +1,5 @@
 """Содержит django-admin команду для загрузки ингредиентов в БД."""
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from rest_framework.parsers import JSONParser
 
 from api.serializers import IngredientSerializer
@@ -12,7 +12,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Определяет аргументы команды."""
         parser.add_argument(
-            'file_name', metavar='<file name>', 
+            'file_name', metavar='<file name>',
             help='Имя файла с ингредиентами.'
         )
 
@@ -29,5 +29,5 @@ class Command(BaseCommand):
         if serializer.is_valid():
             serializer.save()
             return 'Загрузка выполнена успешно.'
-        
+
         return f'Файл содержит некорректные данные:\n{serializer.errors}'

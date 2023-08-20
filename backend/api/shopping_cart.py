@@ -16,7 +16,7 @@ class Ingredient:
         self.amount += occurence.amount
 
     def __str__(self):
-        return f'{self.name}, {self.measurement_unit} - {self.amount}' 
+        return f'{self.name}, {self.measurement_unit} - {self.amount}'
 
 
 class ShoppingCart:

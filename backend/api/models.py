@@ -11,7 +11,7 @@ class Tag(models.Model):
         'Цветовой HEX-код', max_length=7, unique=True,
         validators=(
             RegexValidator(regex=r'\A#[0-9a-fA-F]{6}\Z'),
-        ), 
+        ),
     )
     slug = models.SlugField('Slug', unique=True)
 

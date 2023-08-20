@@ -37,4 +37,4 @@ class ExtendedUserSerializer(UserSerializer):
         если он там есть. В противном случае - 0.
         """
         limit = self.context['request'].query_params.get('recipes_limit', '')
-        return int(limit) if re.fullmatch('\d+', limit) else 0
+        return int(limit) if re.fullmatch(r'\d+', limit) else 0

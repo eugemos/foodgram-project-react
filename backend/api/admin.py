@@ -33,7 +33,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def in_favor_count(self, recipe):
         """Возвращает количество добавлений рецепта в избранное."""
         return recipe.in_favore.count()
-    
+
 
 @admin.register(IngredientOccurence)
 class IngredientOccurenceAdmin(admin.ModelAdmin):

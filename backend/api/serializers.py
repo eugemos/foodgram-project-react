@@ -2,10 +2,9 @@
 from base64 import b64decode
 
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from users.serializers import UserSerializer
+from users.serializers.base import UserSerializer
 from .models import Tag, Ingredient, Recipe, IngredientOccurence
 
 
@@ -15,10 +14,10 @@ class Base64ImageField(serializers.FileField):
 
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')  
-            ext = format.split('/')[-1]  
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
             data = ContentFile(
-                b64decode(imgstr), 
+                b64decode(imgstr),
                 name=f'{self.file_name_base}.{ext}'
             )
 
@@ -94,7 +93,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = (
-            'id', 'author', 'ingredients', 'tags', 
+            'id', 'author', 'ingredients', 'tags',
             'name', 'text', 'cooking_time', 'image',
             'is_favorited', 'is_in_shopping_cart'
         )
@@ -105,12 +104,14 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, recipe):
         """Возвращает значение для поля is_favorited."""
         client_user = self.context['request'].user
-        return client_user.is_authenticated and client_user.has_in_favore(recipe)
+        return (client_user.is_authenticated
+                and client_user.has_in_favore(recipe))
 
     def get_is_in_shopping_cart(self, recipe):
         """Возвращает значение для поля is_in_shopping_cart."""
         client_user = self.context['request'].user
-        return client_user.is_authenticated and client_user.has_in_shopping_cart(recipe)
+        return (client_user.is_authenticated
+                and client_user.has_in_shopping_cart(recipe))
 
     def create(self, validated_data):
         """Создаёт объект типа Recipe."""
@@ -131,7 +132,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.tags.set(tags)
         instance.ingredients.all().delete()
         for occurence in ingredients:
-            instance.add_ingredient(occurence['ingredient'], occurence['amount'])
+            instance.add_ingredient(
+                occurence['ingredient'], occurence['amount']
+            )
 
         return instance
 

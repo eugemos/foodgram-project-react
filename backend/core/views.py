@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from rest_framework import status
 
+
 def page_not_found(request, exception):
     """Отображает кастомную страницу для ошибки 404."""
     context = {'path': request.path}

@@ -6,7 +6,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.paginators import Pagination
 from .models import User
 from .serializers.extended import ExtendedUserSerializer
 
@@ -29,7 +28,7 @@ class UserViewSet(DjoserUserViewSet):
     def get_queryset(self):
         if hasattr(self, 'do_get_subscriptions'):
             return self.request.user.subscribed_to.all()
-        
+
         return super().get_queryset()
 
     @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
