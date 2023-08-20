@@ -35,9 +35,10 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     name = models.CharField('Название', max_length=200)
     text = models.TextField('Описание')
-    image = models.FileField('Картинка', upload_to='recipe')
+    image = models.ImageField('Иллюстрация', upload_to='recipe')
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления, мин.'
     )
@@ -60,7 +61,7 @@ class Recipe(models.Model):
     # )
 
     class Meta:
-        # ordering = ['name']
+        # ordering = ['-pub_date']
         ordering = ['id']
         verbose_name = 'рецепт'
         verbose_name_plural = 'рецепты'
