@@ -1,9 +1,10 @@
-"""Содержит обработчики для эндпойнтов приложения api."""
+"""Содержит обработчики для эндпойнтов API."""
 import re
 
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import django_filters.rest_framework as dj_filters
+from djoser.views import TokenCreateView, UserViewSet as DjoserUserViewSet
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
@@ -11,13 +12,83 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, Recipe
+from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
-    RecipeSerializer, ReducedRecipeSerializer
+    RecipeSerializer, ReducedRecipeSerializer,
+    ExtendedUserSerializer
 )
 from .filters import IngredientFilterSet
 from .permissions import RecipesPermission
 from .shopping_cart import ShoppingCart
+
+
+class GetTokenView(TokenCreateView):
+    """Обработчик эндпойнта 'Получить токен авторизации'."""
+    def post(self, *args, **kwargs):
+        response = super().post(*args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            response.status_code = status.HTTP_201_CREATED
+
+        return response
+
+
+class UserViewSet(DjoserUserViewSet):
+    """Набор обработчиков, обеспечивающих доступ к ресурсам:
+    - 'Пользователи';
+    - 'Подписки'.
+    """
+    def get_queryset(self):
+        if hasattr(self, 'do_get_subscriptions'):
+            return self.request.user.subscribed_to.all()
+
+        return super().get_queryset()
+
+    @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        """Обработчик эндпойнта 'Мои подписки'."""
+        self.do_get_subscriptions = True
+        return self.list(request)
+
+    @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscribe(self, request, id):
+        """Обработчик эндпойнта 'Подписаться на пользователя'."""
+        author = get_object_or_404(User, pk=id)
+        if request.user == author:
+            return Response(
+                dict(errors='Нельзя подписаться на самого себя.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if request.user.is_subscribed_to(author):
+            return Response(
+                dict(errors='Вы уже подписаны на этого автора.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        request.user.subscribe_to(author)
+        serializer = self.get_serializer(author)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+
+    @subscribe.mapping.delete
+    def unsubscribe(self, request, id):
+        """Обработчик эндпойнта 'Отписаться от пользователя'."""
+        author = get_object_or_404(User, pk=id)
+        if not request.user.is_subscribed_to(author):
+            return Response(
+                dict(errors='Вы не подписаны на этого автора.'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        request.user.unsubscribe_from(author)
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class TagViewSet(ReadOnlyModelViewSet):

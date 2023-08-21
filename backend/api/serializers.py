@@ -1,15 +1,55 @@
 """Содержит сериализаторы, используемые приложением api."""
 from base64 import b64decode
+import re
 
 from django.core.files.base import ContentFile
+from djoser.serializers import (
+    UserSerializer as DjoserUserSerializer,
+    UserCreateSerializer as DjoserUserCreateSerializer,
+    SetPasswordSerializer as DjoserSetPasswordSerializer,
+)
 from rest_framework import serializers
 
-from users.serializers.base import UserSerializer
 from recipes.models import Tag, Ingredient, Recipe, IngredientOccurence
 import recipes.serializers
+from users.models import MAX_PASSWORD_LENGTH
 
 
 IngredientSerializer = recipes.serializers.IngredientSerializer
+
+
+class UserSerializer(DjoserUserSerializer):
+    """Сериализатор для модели User."""
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta(DjoserUserSerializer.Meta):
+        fields = DjoserUserSerializer.Meta.fields + ('is_subscribed',)
+
+    def get_is_subscribed(self, user):
+        """Возвращает значение для поля is_subscribed."""
+        client_user = self.context['request'].user
+        return (client_user.is_authenticated
+                and client_user.is_subscribed_to(user))
+
+
+class UserCreateSerializer(DjoserUserCreateSerializer):
+    """Сериализатор, используемый при создании нового пользователя."""
+    password = serializers.CharField(
+        style={'input_type': 'password'},
+        write_only=True,
+        max_length=MAX_PASSWORD_LENGTH
+    )
+
+    class Meta(DjoserUserCreateSerializer.Meta):
+        pass
+
+
+class SetPasswordSerializer(DjoserSetPasswordSerializer):
+    """Сериализатор, используемый при изменении пароля пользователя."""
+    new_password = serializers.CharField(
+        style={"input_type": "password"},
+        max_length=MAX_PASSWORD_LENGTH
+    )
 
 
 class Base64ImageField(serializers.FileField):
@@ -144,3 +184,36 @@ class ReducedRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
         read_only_fields = fields
+
+
+class ExtendedUserSerializer(UserSerializer):
+    """Сериализатор для модели User, расширенный включением информации о
+    рецептах данного пользователя.
+    """
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + ('recipes', 'recipes_count')
+
+    def get_recipes_count(self, user):
+        """Возвращает значение для поля recipes_count."""
+        limit = self.get_recipes_limit()
+        count = user.recipes.count()
+        return min(limit, count) if limit else count
+
+    def get_recipes(self, user):
+        """Возвращает значение для поля recipes."""
+        limit = self.get_recipes_limit()
+        serializer = ReducedRecipeSerializer(
+            user.recipes.all()[0:limit] if limit else user.recipes,
+            many=True, context=self.context
+        )
+        return serializer.data
+
+    def get_recipes_limit(self):
+        """Возвращает значение параметра recipes_limit из строки запроса,
+        если он там есть. В противном случае - 0.
+        """
+        limit = self.context['request'].query_params.get('recipes_limit', '')
+        return int(limit) if re.fullmatch(r'\d+', limit) else 0
