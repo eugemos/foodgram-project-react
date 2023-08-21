@@ -3,13 +3,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 
-
-MAX_PASSWORD_LENGTH = 150
+from users import const
 
 
 class User(AbstractUser):
     """Модель пользователя сайта."""
-    password = models.CharField(_('password'), max_length=MAX_PASSWORD_LENGTH)
+    password = models.CharField(
+        _('password'), max_length=const.MAX_PASSWORD_LENGTH
+    )
     email = models.EmailField(
         _('email address'),
         unique=True,
@@ -17,8 +18,12 @@ class User(AbstractUser):
             'unique': 'Пользователь с таким email уже существует.',
         },
     )
-    first_name = models.CharField(_('first name'), max_length=150)
-    last_name = models.CharField(_('last name'), max_length=150)
+    first_name = models.CharField(
+        _('first name'), max_length=const.MAX_FIRST_NAME_LENGTH
+    )
+    last_name = models.CharField(
+        _('last name'), max_length=const.MAX_LAST_NAME_LENGTH
+    )
     favorites = models.ManyToManyField(
         'recipes.Recipe',
         related_name='in_favore',
@@ -41,7 +46,7 @@ class User(AbstractUser):
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
 
     class Meta:
         ordering = ('id',)

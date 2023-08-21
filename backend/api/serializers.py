@@ -12,7 +12,7 @@ from rest_framework import serializers
 
 from recipes.models import Tag, Ingredient, Recipe, IngredientOccurence
 import recipes.serializers
-from users.models import MAX_PASSWORD_LENGTH
+from users.const import MAX_PASSWORD_LENGTH
 
 
 IngredientSerializer = recipes.serializers.IngredientSerializer
