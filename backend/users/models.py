@@ -20,13 +20,13 @@ class User(AbstractUser):
     first_name = models.CharField(_('first name'), max_length=150)
     last_name = models.CharField(_('last name'), max_length=150)
     favorites = models.ManyToManyField(
-        'api.Recipe',
+        'recipes.Recipe',
         related_name='in_favore',
         verbose_name='Избранные рецепты',
         blank=True,
     )
     shopping_cart = models.ManyToManyField(
-        'api.Recipe',
+        'recipes.Recipe',
         db_table='ShoppingCart',
         related_name='in_shopping_cart',
         verbose_name='Список покупок',
@@ -44,7 +44,7 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
-        ordering = ['id']
+        ordering = ('id',)
         verbose_name = 'пользователь'
         verbose_name_plural = 'пользователи'
 

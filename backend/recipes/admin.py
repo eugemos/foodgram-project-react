@@ -1,4 +1,4 @@
-"""Содержит настройки административной панели для приложения api."""
+"""Содержит настройки административной панели для приложения recipes."""
 from django.contrib import admin
 
 from .models import Tag, Ingredient, Recipe, IngredientOccurence

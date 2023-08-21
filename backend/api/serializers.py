@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from users.serializers.base import UserSerializer
-from .models import Tag, Ingredient, Recipe, IngredientOccurence
+from recipes.models import Tag, Ingredient, Recipe, IngredientOccurence
 
 
 class Base64ImageField(serializers.FileField):

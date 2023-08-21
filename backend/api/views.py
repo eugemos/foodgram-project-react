@@ -10,7 +10,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Tag, Ingredient, Recipe
+from recipes.models import Tag, Ingredient, Recipe
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, ReducedRecipeSerializer

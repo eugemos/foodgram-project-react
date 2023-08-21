@@ -1,7 +1,7 @@
 """Содержит фильтры, используемые приложением api."""
 import django_filters.rest_framework as dj_filters
 
-from .models import Ingredient
+from recipes.models import Ingredient
 
 
 class IngredientFilterSet(dj_filters.FilterSet):

@@ -1,4 +1,4 @@
-"""Содержит модели, используемые приложением api."""
+"""Содержит модели, используемые приложением recipes."""
 from django.contrib.auth import get_user_model
 from django.core.validators import RegexValidator
 from django.db import models
@@ -16,7 +16,7 @@ class Tag(models.Model):
     slug = models.SlugField('Slug', unique=True)
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = 'тег'
         verbose_name_plural = 'теги'
 
@@ -30,7 +30,7 @@ class Ingredient(models.Model):
     measurement_unit = models.CharField('Единица измерения', max_length=20)
 
     class Meta:
-        ordering = ['name']
+        ordering = ('name',)
         verbose_name = 'ингредиент'
         verbose_name_plural = 'ингредиенты'
 
@@ -60,7 +60,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ['-pub_date']  # ['id']
+        ordering = ['id']  # ('-pub_date',)  # 
         verbose_name = 'рецепт'
         verbose_name_plural = 'рецепты'
 
@@ -95,7 +95,7 @@ class IngredientOccurence(models.Model):
     )
 
     class Meta:
-        ordering = ['ingredient']
+        ordering = ('ingredient',)
         verbose_name = 'использование ингредиента'
         verbose_name_plural = 'использования ингредиентов'
 

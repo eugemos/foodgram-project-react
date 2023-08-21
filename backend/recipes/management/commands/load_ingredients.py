@@ -7,7 +7,7 @@ from api.serializers import IngredientSerializer
 
 class Command(BaseCommand):
     """Определяет django-admin команду для загрузки ингредиентов в БД."""
-    help = "Загружает ингредиенты в БД из файла в формате JSON."
+    help = 'Загружает ингредиенты в БД из файла в формате JSON.'
 
     def add_arguments(self, parser):
         """Определяет аргументы команды."""
