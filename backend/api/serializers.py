@@ -134,9 +134,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time', 'image',
             'is_favorited', 'is_in_shopping_cart'
         )
-        extra_kwargs = {
-            'cooking_time': {'min_value': 1},
-        }
 
     def get_is_favorited(self, recipe):
         """Возвращает значение для поля is_favorited."""

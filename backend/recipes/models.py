@@ -1,7 +1,8 @@
 """Содержит модели, используемые приложением recipes."""
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 
 from recipes import const
 
@@ -44,6 +45,12 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'ингредиент'
         verbose_name_plural = 'ингредиенты'
+        constraints = (
+            UniqueConstraint(
+                fields=('name', 'measurement_unit'),
+                name='unique_ingredient'
+            ),
+        )
 
     def __str__(self):
         return f'{self.name}'
@@ -58,7 +65,10 @@ class Recipe(models.Model):
     text = models.TextField('Описание')
     image = models.ImageField('Иллюстрация', upload_to='recipe')
     cooking_time = models.PositiveSmallIntegerField(
-        'Время приготовления, мин.'
+        'Время приготовления, мин.',
+        validators=(
+            MinValueValidator(1, 'Это значение должно быть больше нуля.'),
+        )
     )
     author = models.ForeignKey(
         get_user_model(),
