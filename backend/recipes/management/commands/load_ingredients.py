@@ -2,7 +2,7 @@
 from django.core.management.base import BaseCommand
 from rest_framework.parsers import JSONParser
 
-from api.serializers import IngredientSerializer
+from recipes.serializers import IngredientSerializer
 
 
 class Command(BaseCommand):
