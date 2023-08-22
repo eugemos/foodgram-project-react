@@ -153,9 +153,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.set_tags(tags)
-        for occurence in ingredients:
-            recipe.add_ingredient(occurence['ingredient'], occurence['amount'])
-
+        recipe.add_ingredients(ingredients)
         return recipe
 
     def update(self, instance, validated_data):
@@ -165,11 +163,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance = super().update(instance, validated_data)
         instance.tags.set(tags)
         instance.ingredients.all().delete()
-        for occurence in ingredients:
-            instance.add_ingredient(
-                occurence['ingredient'], occurence['amount']
-            )
-
+        instance.add_ingredients(ingredients)
         return instance
 
 

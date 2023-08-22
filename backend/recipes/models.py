@@ -90,10 +90,20 @@ class Recipe(models.Model):
     def __str__(self):
         return f'{self.name}'
 
-    def add_ingredient(self, ingredient, amount):
-        """Добавляет ингредиент в рецепт."""
-        IngredientOccurence.objects.create(
-            recipe=self, ingredient=ingredient, amount=amount
+    def add_ingredients(self, ingredient, amount=None):
+        """Добавляет ингредиенты в рецепт."""
+        if isinstance(ingredient, Ingredient):
+            occurences = (dict(ingredient=ingredient, amount=amount),)
+        else:
+            occurences = ingredient
+            
+        IngredientOccurence.objects.bulk_create(
+            IngredientOccurence(
+                recipe=self,
+                ingredient=occurence['ingredient'],
+                amount=occurence['amount']
+            )
+            for occurence in occurences       
         )
 
     def set_tags(self, tags):
