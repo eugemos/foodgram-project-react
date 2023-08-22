@@ -83,7 +83,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ['id']  # ('-pub_date',)  # 
+        ordering = const.RECIPES_ORDERING
         verbose_name = 'рецепт'
         verbose_name_plural = 'рецепты'
 
