@@ -126,7 +126,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         required=True, many=True, allow_empty=False
     )
     author = UserSerializer(read_only=True)
-    is_favorited = serializers.BooleanField(read_only=True)
+    is_favorited = serializers.BooleanField(read_only=True, default=False)
     # is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
