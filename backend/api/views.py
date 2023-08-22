@@ -1,6 +1,8 @@
 """Содержит обработчики для эндпойнтов API."""
 import re
 
+from django.db.models import F, Sum, Value
+from django.db.models.lookups import Exact
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 import django_filters.rest_framework as dj_filters
@@ -12,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, Recipe
+from recipes.const import RECIPES_ORDERING
 from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
@@ -123,6 +126,15 @@ class RecipeViewSet(ModelViewSet):
         """
         user = self.request.user
         qs = super().get_queryset()
+        if user.is_authenticated:
+            qs = qs.annotate(
+                is_favorited=Sum(Exact(F('in_favore'), user.id), default=False)
+            )
+        else:
+            qs = qs.annotate(is_favorited=Value(False))
+
+        qs = qs.order_by(*RECIPES_ORDERING)
+
         if self.request.query_params.get('is_favorited', 0) == '1':
             if user.is_authenticated:
                 qs = qs.filter(in_favore=user)

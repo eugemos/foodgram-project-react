@@ -126,7 +126,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         required=True, many=True, allow_empty=False
     )
     author = UserSerializer(read_only=True)
-    is_favorited = serializers.SerializerMethodField()
+    is_favorited = serializers.BooleanField(read_only=True)
+    # is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
@@ -137,11 +138,12 @@ class RecipeSerializer(serializers.ModelSerializer):
             'is_favorited', 'is_in_shopping_cart'
         )
 
-    def get_is_favorited(self, recipe):
+    def get_is_favorited_(self, recipe):
         """Возвращает значение для поля is_favorited."""
-        client_user = self.context['request'].user
-        return (client_user.is_authenticated
-                and client_user.has_in_favore(recipe))
+        return recipe.is_favorited
+        # client_user = self.context['request'].user
+        # return (client_user.is_authenticated
+        #         and client_user.has_in_favore(recipe))
 
     def get_is_in_shopping_cart(self, recipe):
         """Возвращает значение для поля is_in_shopping_cart."""
