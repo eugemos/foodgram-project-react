@@ -21,7 +21,7 @@ from .serializers import (
     RecipeSerializer, ReducedRecipeSerializer,
     ExtendedUserSerializer
 )
-from .filters import IngredientFilterSet
+from .filters import IngredientFilterSet, RecipeFilterBackend
 from .permissions import RecipesPermission
 from .shopping_cart import ShoppingCart
 
@@ -119,11 +119,10 @@ class RecipeViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (RecipesPermission,)
+    filter_backends = (RecipeFilterBackend,)
 
     def get_queryset(self):
-        """Возвращает кверисет для доступа к ресурсу 'Рецепты'
-        с учётом параметров строки запроса.
-        """
+        """Возвращает кверисет для доступа к ресурсу 'Рецепты'."""
         user = self.request.user
         qs = super().get_queryset()
         if user.is_authenticated:
@@ -138,32 +137,7 @@ class RecipeViewSet(ModelViewSet):
                 is_favorited=Value(False), is_in_shopping_cart=Value(False)
             )
 
-        qs = qs.order_by(*RECIPES_ORDERING)
-
-        if self.request.query_params.get('is_favorited', 0) == '1':
-            if user.is_authenticated:
-                qs = qs.filter(in_favore=user)
-            else:
-                qs = qs.none()
-
-        if self.request.query_params.get('is_in_shopping_cart', 0) == '1':
-            if user.is_authenticated:
-                qs = qs.filter(in_shopping_cart=user)
-            else:
-                qs = qs.none()
-
-        if 'author' in self.request.query_params:
-            author_id = self.request.query_params['author']
-            if re.fullmatch(r'\d+', author_id):
-                qs = qs.filter(author__id=author_id)
-            else:
-                qs = qs.none()
-
-        tags = self.request.query_params.getlist('tags')
-        if tags:
-            qs = qs.filter(tags__slug__in=tags).distinct()
-
-        return qs
+        return qs.order_by(*RECIPES_ORDERING)
 
     def perform_create(self, serializer):
         """Выполняет операцию создания рецепта."""
