@@ -3,6 +3,7 @@ from base64 import b64decode
 import re
 
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from djoser.serializers import (
     UserSerializer as DjoserUserSerializer,
     UserCreateSerializer as DjoserUserCreateSerializer,
@@ -100,25 +101,26 @@ class IngredientOccurenceSerialiser(serializers.ModelSerializer):
         }
 
 
-class TagField(serializers.PrimaryKeyRelatedField):
+class TagField(TagSerializer):
     """Поле для представления модели Tag в составе других объектов."""
-    def to_representation(self, instance):
-        if isinstance(instance, Tag):
-            return dict(
-                id=instance.id,
-                name=instance.name,
-                color=instance.color,
-                slug=instance.slug
+    def to_internal_value(self, data):
+        try:
+            return Tag.objects.get(pk=data)
+        except ValueError:
+            raise serializers.ValidationError(
+                ['Идентификатор тега должен быть целым числом.']
             )
-
-        return super().to_representation(instance)
+        except Tag.DoesNotExist:
+            raise serializers.ValidationError(
+                ['Тег с таким идентификатором не найден.']
+            )
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
     image = RecipeImageField(required=True)
     tags = TagField(
-        required=True, many=True, allow_empty=False, queryset=Tag.objects.all()
+        required=True, many=True, allow_empty=False,
     )
     ingredients = IngredientOccurenceSerialiser(
         required=True, many=True, allow_empty=False
