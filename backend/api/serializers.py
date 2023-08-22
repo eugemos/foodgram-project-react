@@ -127,8 +127,9 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
     author = UserSerializer(read_only=True)
     is_favorited = serializers.BooleanField(read_only=True, default=False)
-    # is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.BooleanField(
+        read_only=True, default=False
+    )
 
     class Meta:
         model = Recipe
@@ -137,19 +138,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name', 'text', 'cooking_time', 'image',
             'is_favorited', 'is_in_shopping_cart'
         )
-
-    def get_is_favorited_(self, recipe):
-        """Возвращает значение для поля is_favorited."""
-        return recipe.is_favorited
-        # client_user = self.context['request'].user
-        # return (client_user.is_authenticated
-        #         and client_user.has_in_favore(recipe))
-
-    def get_is_in_shopping_cart(self, recipe):
-        """Возвращает значение для поля is_in_shopping_cart."""
-        client_user = self.context['request'].user
-        return (client_user.is_authenticated
-                and client_user.has_in_shopping_cart(recipe))
 
     def create(self, validated_data):
         """Создаёт объект типа Recipe."""

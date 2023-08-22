@@ -128,10 +128,15 @@ class RecipeViewSet(ModelViewSet):
         qs = super().get_queryset()
         if user.is_authenticated:
             qs = qs.annotate(
-                is_favorited=Sum(Exact(F('in_favore'), user.id), default=False)
+                is_favorited=
+                    Sum(Exact(F('in_favore'), user.id), default=False),
+                is_in_shopping_cart=
+                    Sum(Exact(F('in_shopping_cart'), user.id), default=False),
             )
         else:
-            qs = qs.annotate(is_favorited=Value(False))
+            qs = qs.annotate(
+                is_favorited=Value(False), is_in_shopping_cart=Value(False)
+            )
 
         qs = qs.order_by(*RECIPES_ORDERING)
 
