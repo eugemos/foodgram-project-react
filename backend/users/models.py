@@ -1,7 +1,6 @@
 """Содержит модели, используемые приложением users."""
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
 
 from users import const
 
@@ -9,20 +8,20 @@ from users import const
 class User(AbstractUser):
     """Модель пользователя сайта."""
     password = models.CharField(
-        _('password'), max_length=const.MAX_PASSWORD_LENGTH
+        'Пароль', max_length=const.MAX_PASSWORD_LENGTH
     )
     email = models.EmailField(
-        _('email address'),
+        'Адрес электронной почты',
         unique=True,
         error_messages={
             'unique': 'Пользователь с таким email уже существует.',
         },
     )
     first_name = models.CharField(
-        _('first name'), max_length=const.MAX_FIRST_NAME_LENGTH
+        'Имя', max_length=const.MAX_FIRST_NAME_LENGTH
     )
     last_name = models.CharField(
-        _('last name'), max_length=const.MAX_LAST_NAME_LENGTH
+        'Фамилия', max_length=const.MAX_LAST_NAME_LENGTH
     )
     favorites = models.ManyToManyField(
         'recipes.Recipe',
