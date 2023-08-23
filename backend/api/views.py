@@ -3,6 +3,7 @@ from django.db.models import F, Sum, Value
 from django.db.models.lookups import Exact
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 import django_filters.rest_framework as dj_filters
 from djoser.views import TokenCreateView, UserViewSet as DjoserUserViewSet
 from rest_framework import status
@@ -40,7 +41,7 @@ class UserViewSet(DjoserUserViewSet):
     - 'Подписки'.
     """
     def get_queryset(self):
-        if hasattr(self, 'do_get_subscriptions'):
+        if self.request.path == reverse('users-subscriptions'):
             return self.request.user.subscribed_to.all()
 
         return super().get_queryset()
@@ -49,7 +50,6 @@ class UserViewSet(DjoserUserViewSet):
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
         """Обработчик эндпойнта 'Мои подписки'."""
-        self.do_get_subscriptions = True
         return self.list(request)
 
     @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
