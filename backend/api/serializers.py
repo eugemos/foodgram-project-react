@@ -166,7 +166,6 @@ class ReducedRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
-        read_only_fields = fields
 
 
 class ExtendedUserSerializer(UserSerializer):
