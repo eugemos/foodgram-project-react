@@ -146,10 +146,6 @@ class RecipeViewSet(ModelViewSet):
         """Выполняет операцию изменения рецепта."""
         serializer.save(author=self.request.user)
 
-    def partial_update(self, request, *args, **kwargs):
-        """Выполняет операцию частичного изменения рецепта."""
-        return self.update(request, *args, **kwargs)
-
     @action(detail=True, methods=[],
             serializer_class=ReducedRecipeSerializer)
     def shopping_cart(self, request, pk):
