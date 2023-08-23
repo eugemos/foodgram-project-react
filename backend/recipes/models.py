@@ -113,7 +113,12 @@ class Recipe(models.Model):
 
 class IngredientOccurence(models.Model):
     """Модель, представляющая вхождение ингредиента в рецепт."""
-    amount = models.PositiveSmallIntegerField('Количество')
+    amount = models.PositiveSmallIntegerField(
+        'Количество',
+        validators=(
+            MinValueValidator(1, 'Это значение должно быть больше нуля.'),
+        )
+    )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.PROTECT,

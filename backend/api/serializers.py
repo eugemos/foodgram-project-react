@@ -96,9 +96,6 @@ class IngredientOccurenceSerialiser(serializers.ModelSerializer):
     class Meta:
         model = IngredientOccurence
         fields = ('id', 'amount', 'measurement_unit', 'name')
-        extra_kwargs = {
-            'amount': {'min_value': 1},
-        }
 
 
 class TagField(TagSerializer):
