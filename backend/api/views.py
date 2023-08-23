@@ -23,7 +23,7 @@ from .serializers import (
 )
 from .filters import IngredientFilterSet, RecipeFilterBackend
 from .permissions import RecipesPermission
-from .shopping_cart import ShoppingCart
+from .shopping_cart import get_shopping_cart_txt
 
 
 class GetTokenView(TokenCreateView):
@@ -222,13 +222,11 @@ class RecipeViewSet(ModelViewSet):
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         """Обеспечивает выполнение операции 'Скачать список покупок'."""
-        user = request.user
-        cart = ShoppingCart(user)
         return HttpResponse(
-            cart.to_text(),
+            get_shopping_cart_txt(request.user),
             headers={
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Content-Disposition':
-                    f'attachment; filename="shopping_cart_{user.id}.txt"',
+                    f'attachment; filename="shopping_cart_{request.user.id}.txt"',
             }
         )

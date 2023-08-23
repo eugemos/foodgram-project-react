@@ -3,6 +3,11 @@
 """
 
 
+def get_shopping_cart_txt(user):
+    cart = ShoppingCart(user)
+    return cart.to_text()
+    
+
 class Ingredient:
     """Представляет ингредиент в списке покупок."""
     def __init__(self, occurence):
