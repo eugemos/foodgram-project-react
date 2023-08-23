@@ -116,28 +116,27 @@ class RecipeViewSet(ModelViewSet):
     - 'Список покупок';
     - 'Избранное'.
     """
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (RecipesPermission,)
     filter_backends = (RecipeFilterBackend,)
 
     def get_queryset(self):
         """Возвращает кверисет для доступа к ресурсу 'Рецепты'."""
+        queryset = Recipe.objects.all()
         user = self.request.user
-        qs = super().get_queryset()
         if user.is_authenticated:
-            qs = qs.annotate(
+            queryset = queryset.annotate(
                 is_favorited=
                     Sum(Exact(F('in_favore'), user.id), default=False),
                 is_in_shopping_cart=
                     Sum(Exact(F('in_shopping_cart'), user.id), default=False),
             )
         else:
-            qs = qs.annotate(
+            queryset = queryset.annotate(
                 is_favorited=Value(False), is_in_shopping_cart=Value(False)
             )
 
-        return qs.order_by(*RECIPES_ORDERING)
+        return queryset.order_by(*RECIPES_ORDERING)
 
     def perform_create(self, serializer):
         """Выполняет операцию создания рецепта."""
@@ -194,23 +193,21 @@ class RecipeViewSet(ModelViewSet):
     def add_to_list(self, list_name, request, pk):
         """Выполняет операцию добавления рецепта в список."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = request.user
-        if user.has_in_list(list_name, recipe):
+        if request.user.has_in_list(list_name, recipe):
             return Response(
                 dict(errors='Этот рецепт уже есть в этом списке.'),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        user.add_to_list(list_name, recipe)
+        request.user.add_to_list(list_name, recipe)
         serializer = self.get_serializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, list_name, request, pk):
         """Выполняет операцию удаления рецепта из списка."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = request.user
-        if user.has_in_list(list_name, recipe):
-            user.remove_from_list(list_name, recipe)
+        if request.user.has_in_list(list_name, recipe):
+            request.user.remove_from_list(list_name, recipe)
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
         return Response(
