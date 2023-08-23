@@ -4,9 +4,10 @@
 
 
 def get_shopping_cart_txt(user):
+    """Возвращает список покупок заданного пользователя в текстовом виде."""
     cart = ShoppingCart(user)
     return cart.to_text()
-    
+
 
 class Ingredient:
     """Представляет ингредиент в списке покупок."""
@@ -40,7 +41,7 @@ class ShoppingCart:
                     self.cart[key] = Ingredient(occurence)
 
     def to_text(self):
-        """Создаёт текстовое представление списка покупок."""
+        """Возвращает текстовое представление списка покупок."""
         if self.cart:
             lines = [str(ingredient) for ingredient in self.cart.values()]
             lines.append('')

@@ -1,6 +1,4 @@
 """Содержит обработчики для эндпойнтов API."""
-import re
-
 from django.db.models import F, Sum, Value
 from django.db.models.lookups import Exact
 from django.http import HttpResponse
@@ -126,10 +124,10 @@ class RecipeViewSet(ModelViewSet):
         user = self.request.user
         if user.is_authenticated:
             queryset = queryset.annotate(
-                is_favorited=
-                    Sum(Exact(F('in_favore'), user.id), default=False),
-                is_in_shopping_cart=
-                    Sum(Exact(F('in_shopping_cart'), user.id), default=False),
+                is_favorited=Sum(Exact(F('in_favore'), user.id),
+                                 default=False),
+                is_in_shopping_cart=Sum(Exact(F('in_shopping_cart'), user.id),
+                                        default=False),
             )
         else:
             queryset = queryset.annotate(
@@ -220,6 +218,7 @@ class RecipeViewSet(ModelViewSet):
             headers={
                 'Content-Type': 'text/plain; charset=utf-8',
                 'Content-Disposition':
-                    f'attachment; filename="shopping_cart_{request.user.id}.txt"',
+                    'attachment; '
+                    f'filename="shopping_cart_{request.user.id}.txt"',
             }
         )
