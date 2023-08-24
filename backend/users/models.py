@@ -23,19 +23,6 @@ class User(AbstractUser):
     last_name = models.CharField(
         'Фамилия', max_length=const.MAX_LAST_NAME_LENGTH
     )
-    favorites = models.ManyToManyField(
-        'recipes.Recipe',
-        related_name='in_favore',
-        verbose_name='Избранные рецепты',
-        blank=True,
-    )
-    shopping_cart = models.ManyToManyField(
-        'recipes.Recipe',
-        db_table='ShoppingCart',
-        related_name='in_shopping_cart',
-        verbose_name='Список покупок',
-        blank=True,
-    )
     subscribed_to = models.ManyToManyField(
         'self',
         related_name='subscribers',
@@ -55,20 +42,6 @@ class User(AbstractUser):
     def __str__(self):
         return f'{self.username} ({self.email})'
 
-    def has_in_list(self, list_name: str, obj):
-        """Возвращает True, если объект obj находится в списке list_name
-        пользователя.
-        """
-        return obj in getattr(self, list_name).all()
-
-    def add_to_list(self, list_name: str, obj):
-        """Добавляет объект obj в список list_name пользователя."""
-        getattr(self, list_name).add(obj)
-
-    def remove_from_list(self, list_name: str, obj):
-        """Удаляет объект obj из списка list_name пользователя."""
-        getattr(self, list_name).remove(obj)
-
     def is_subscribed_to(self, author):
         """Возвращает True, если пользователь подписан на заданного
         автора.
@@ -86,31 +59,3 @@ class User(AbstractUser):
     def set_subscriptions(self, authors):
         """Задаёт множество подписок пользователя."""
         self.subscribed_to.set(authors)
-
-    def has_in_favore(self, recipe):
-        """Возвращает True, если рецепт содержится в избранном
-        пользователя.
-        """
-        return recipe in self.favorites.all()
-
-    def add_to_favorites(self, recipe):
-        """Добавляет рецепт в избранное пользователя."""
-        self.favorites.add(recipe)
-
-    def remove_from_favorites(self, recipe):
-        """Удаляет рецепт из избранного пользователя."""
-        self.favorites.remove(recipe)
-
-    def has_in_shopping_cart(self, recipe):
-        """Возвращает True, если рецепт содержится в списке покупок
-        пользователя.
-        """
-        return recipe in self.shopping_cart.all()
-
-    def add_to_shopping_cart(self, recipe):
-        """Добавляет рецепт в список покупок пользователя."""
-        self.shopping_cart.add(recipe)
-
-    def remove_from_shopping_cart(self, recipe):
-        """Удаляет рецепт из списка покупок пользователя."""
-        self.shopping_cart.remove(recipe)

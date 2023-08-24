@@ -81,6 +81,19 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Теги',
     )
+    in_favorites = models.ManyToManyField(
+        get_user_model(),
+        related_name='favorites',
+        verbose_name='В избранных рецептах у пользователей',
+        blank=True,
+    )
+    in_shopping_cart = models.ManyToManyField(
+        get_user_model(),
+        db_table='ShoppingCart',
+        related_name='shopping_cart',
+        verbose_name='В списке покупок у пользователей',
+        blank=True,
+    )
 
     class Meta:
         ordering = const.RECIPES_ORDERING

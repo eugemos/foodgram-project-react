@@ -21,7 +21,7 @@ class RecipeFilterBackend(BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         if request.query_params.get('is_favorited', 0) == '1':
             if request.user.is_authenticated:
-                queryset = queryset.filter(in_favore=request.user)
+                queryset = queryset.filter(in_favorites=request.user)
             else:
                 queryset = queryset.none()
 

@@ -14,6 +14,9 @@ from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, Recipe
 from recipes.const import RECIPES_ORDERING
+from recipes.user_utils import (
+    user_has_in_list, add_to_list_of_user, remove_from_list_of_user
+)
 from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
@@ -124,7 +127,7 @@ class RecipeViewSet(ModelViewSet):
         user = self.request.user
         if user.is_authenticated:
             queryset = queryset.annotate(
-                is_favorited=Sum(Exact(F('in_favore'), user.id),
+                is_favorited=Sum(Exact(F('in_favorites'), user.id),
                                  default=False),
                 is_in_shopping_cart=Sum(Exact(F('in_shopping_cart'), user.id),
                                         default=False),
@@ -187,21 +190,21 @@ class RecipeViewSet(ModelViewSet):
     def add_to_list(self, list_name, request, pk):
         """Выполняет операцию добавления рецепта в список."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        if request.user.has_in_list(list_name, recipe):
+        if user_has_in_list(request.user, list_name, recipe):
             return Response(
                 dict(errors='Этот рецепт уже есть в этом списке.'),
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        request.user.add_to_list(list_name, recipe)
+        add_to_list_of_user(request.user, list_name, recipe)
         serializer = self.get_serializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def remove_from_list(self, list_name, request, pk):
         """Выполняет операцию удаления рецепта из списка."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        if request.user.has_in_list(list_name, recipe):
-            request.user.remove_from_list(list_name, recipe)
+        if user_has_in_list(request.user, list_name, recipe):
+            remove_from_list_of_user(request.user, list_name, recipe)
             return Response(None, status=status.HTTP_204_NO_CONTENT)
 
         return Response(
