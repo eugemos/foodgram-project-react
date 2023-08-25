@@ -47,7 +47,7 @@ class UserCreateSerializer(DjoserUserCreateSerializer):
 class SetPasswordSerializer(DjoserSetPasswordSerializer):
     """Сериализатор, используемый при изменении пароля пользователя."""
     new_password = serializers.CharField(
-        style={"input_type": "password"},
+        style={'input_type': 'password'},
         max_length=MAX_PASSWORD_LENGTH
     )
 

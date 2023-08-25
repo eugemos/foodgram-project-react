@@ -18,6 +18,6 @@ class RecipesPermission(BasePermission):
         """Возвращает право на доступ к конкретному элементу ресурса."""
         return (
             request.method in SAFE_METHODS
-            or request.method == "POST"
+            or request.method == 'POST'
             or request.user == obj.author
         )
