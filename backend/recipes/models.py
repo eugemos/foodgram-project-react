@@ -4,20 +4,20 @@ from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
 
-from recipes import const
+from recipes import constants
 
 
 class Tag(models.Model):
     """Модель тега."""
     name = models.CharField(
-        'Название', max_length=const.MAX_TAG_NAME_LENGTH, unique=True
+        'Название', max_length=constants.MAX_TAG_NAME_LENGTH, unique=True
     )
     color = models.CharField(
         'Цветовой HEX-код',
-        max_length=const.TAG_COLOR_CODE_LENGTH,
+        max_length=constants.TAG_COLOR_CODE_LENGTH,
         unique=True,
         validators=(
-            RegexValidator(regex=const.TAG_COLOR_CODE_REGEXP),
+            RegexValidator(regex=constants.TAG_COLOR_CODE_REGEXP),
         ),
     )
     slug = models.SlugField('Slug', unique=True)
@@ -34,11 +34,11 @@ class Tag(models.Model):
 class Ingredient(models.Model):
     """Модель ингредиента."""
     name = models.CharField(
-        'Название', max_length=const.MAX_INGREDIENT_NAME_LENGTH
+        'Название', max_length=constants.MAX_INGREDIENT_NAME_LENGTH
     )
     measurement_unit = models.CharField(
         'Единица измерения',
-        max_length=const.MAX_INGREDIENT_MEASUREMENT_UNIT_LENGTH
+        max_length=constants.MAX_INGREDIENT_MEASUREMENT_UNIT_LENGTH
     )
 
     class Meta:
@@ -60,7 +60,7 @@ class Recipe(models.Model):
     """Модель рецепта."""
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     name = models.CharField(
-        'Название', max_length=const.MAX_RECIPE_NAME_LENGTH
+        'Название', max_length=constants.MAX_RECIPE_NAME_LENGTH
     )
     text = models.TextField('Описание')
     image = models.ImageField('Иллюстрация', upload_to='recipe')
@@ -96,7 +96,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = const.RECIPES_ORDERING
+        ordering = constants.RECIPES_ORDERING
         verbose_name = 'рецепт'
         verbose_name_plural = 'рецепты'
 

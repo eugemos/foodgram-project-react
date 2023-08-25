@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, Recipe
-from recipes.const import RECIPES_ORDERING
+from recipes.constants import RECIPES_ORDERING
 from recipes.user_utils import (
     user_has_in_list, add_to_list_of_user, remove_from_list_of_user
 )

@@ -2,13 +2,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-from users import const
+from users import constants
 
 
 class User(AbstractUser):
     """Модель пользователя сайта."""
     password = models.CharField(
-        'Пароль', max_length=const.MAX_PASSWORD_LENGTH
+        'Пароль', max_length=constants.MAX_PASSWORD_LENGTH
     )
     email = models.EmailField(
         'Адрес электронной почты',
@@ -18,10 +18,10 @@ class User(AbstractUser):
         },
     )
     first_name = models.CharField(
-        'Имя', max_length=const.MAX_FIRST_NAME_LENGTH
+        'Имя', max_length=constants.MAX_FIRST_NAME_LENGTH
     )
     last_name = models.CharField(
-        'Фамилия', max_length=const.MAX_LAST_NAME_LENGTH
+        'Фамилия', max_length=constants.MAX_LAST_NAME_LENGTH
     )
     subscribed_to = models.ManyToManyField(
         'self',
