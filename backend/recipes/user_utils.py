@@ -13,9 +13,11 @@ def user_has_in_list(user: User, list_name: str, recipe: Recipe):
     """
     return recipe in getattr(user, list_name).all()
 
+
 def add_to_list_of_user(user: User, list_name: str, recipe: Recipe):
     """Добавляет рецепт в список list_name пользователя."""
     getattr(user, list_name).add(recipe)
+
 
 def remove_from_list_of_user(user: User, list_name: str, recipe: Recipe):
     """Удаляет рецепт из списка list_name пользователя."""
