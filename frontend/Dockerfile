@@ -5,5 +5,5 @@ COPY package*.json ./
 RUN npm install
 COPY . ./
 RUN npm run build
-CMD cp -r build result_build
+CMD cp -r build/. static_files
 # CMD ["npx", "-y", "http-server", "-p", "8000", "/app/build"]
