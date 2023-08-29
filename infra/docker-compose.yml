@@ -3,7 +3,7 @@ version: '3.3'
 volumes:
   pg_data:
   static_files:
-  # media:
+  media:
 
 services:
   db:
@@ -17,9 +17,9 @@ services:
     env_file: .env
     depends_on:
       - db
-    # volumes:
-      # - static:/backend_static
-      # - media:/app/media
+    volumes:
+      - static_files:/app/static_files
+      - media:/app/media
 
   frontend:
     build:
@@ -40,4 +40,5 @@ services:
       # - ./nginx.conf:/etc/nginx/conf.d/default.conf
       # - ../frontend/build:/usr/share/nginx/html/
       - static_files:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      - media:/usr/share/nginx/media
+      # - ../docs/:/usr/share/nginx/html/api/docs/
