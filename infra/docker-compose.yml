@@ -30,6 +30,8 @@ services:
   nginx:
     # image: nginx:1.19.3
     build: .
+    depends_on:
+      - backend
     ports:
       - "80:80"
     volumes:
