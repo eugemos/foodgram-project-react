@@ -1,6 +1,5 @@
 """Содержит обработчики для эндпойнтов API."""
-from django.db.models import F, Sum, Value
-from django.db.models.lookups import Exact
+from django.db.models import Value, OuterRef, Exists
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -127,10 +126,16 @@ class RecipeViewSet(ModelViewSet):
         user = self.request.user
         if user.is_authenticated:
             queryset = queryset.annotate(
-                is_favorited=Sum(Exact(F('in_favorites'), user.id),
-                                 default=False),
-                is_in_shopping_cart=Sum(Exact(F('in_shopping_cart'), user.id),
-                                        default=False),
+                # is_favorited=Sum(Exact(F('in_favorites'), user.id),
+                #                  default=False),
+                is_favorited=Exists(
+                    user.favorites.filter(pk=OuterRef('pk'))
+                ),
+                # is_in_shopping_cart=Sum(Exact(F('in_shopping_cart'), user.id),
+                #                         default=False),
+                is_in_shopping_cart=Exists(
+                    user.shopping_cart.filter(pk=OuterRef('pk'))
+                ),
             )
         else:
             queryset = queryset.annotate(
