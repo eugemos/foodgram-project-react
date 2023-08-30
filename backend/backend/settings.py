@@ -62,7 +62,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': sqlite_db,
-    } 
+    }
     if sqlite_db
     else {
         'ENGINE': 'django.db.backends.postgresql',
