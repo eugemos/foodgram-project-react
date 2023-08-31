@@ -22,29 +22,29 @@ Python (Django, DRF), JavaScript (React), PostgreSQL, Gunicorn, Nginx, Docker
 расположенный в папке `data/` репозитория проекта.
 3. Создать в папке проекта файл `.env` с необходимыми переменными окружения.
 4. Перейти в папку проекта и выполнить запуск сети контейнеров приложения:
-```
-sudo docker compose -f docker-compose.production.yml up -d`
-```
+    ```
+    sudo docker compose -f docker-compose.production.yml up -d`
+    ```
 4. Скопировать в бэкэнд проекта файл с ингредиентами `ingredients.json`:
-```
-sudo docker compose -f docker-compose.production.yml cp ingredients.json backend:/app/
-```
+    ```
+    sudo docker compose -f docker-compose.production.yml cp ingredients.json backend:/app/
+    ```
 5. Выполнить первоначальную настройку проекта, для чего запустить консоль в бэкэнде проекта:
-```
-sudo docker compose -f docker-compose.production.yml exec -it backend bash
-```
-и далее выполнить в ней:
-- применение миграций: `python manage.py migrate`;
-- сбор и копирование статики:
-```
-python manage.py collectstatic
-cp -r /app/collected_static/. /app/static_files/static/
-```
-- создать суперпользователя: `python manage.py createsuperuser` - в ответ на запрос системы ввести данные суперпользователя: e-mail, login (имя пользователя), имя, фамилию и пароль (дважды);
-- заполнить базу данных ингредиентами: 
-```
-python manage.py load_ingredients ingredients.json
-```
+    ```
+    sudo docker compose -f docker-compose.production.yml exec -it backend bash
+    ```
+    и далее выполнить в ней:
+    - применение миграций: `python manage.py migrate`;
+    - сбор и копирование статики:
+        ```
+        python manage.py collectstatic
+        cp -r /app/collected_static/. /app/static_files/static/
+        ```
+    - создать суперпользователя: `python manage.py createsuperuser` - в ответ на запрос системы ввести данные суперпользователя: e-mail, login (имя пользователя), имя, фамилию и пароль (дважды);
+    - заполнить базу данных ингредиентами: 
+        ```
+        python manage.py load_ingredients ingredients.json
+        ```
 6. Проект будет работать через стандартный порт 80 хоста.
 7. Теперь можно зайти в раздел администрирования сайта (http://<HOST>/admin/) от имени созданного суперпользователя и добавить в БД необходимые тэги для рецептов.
 
@@ -57,12 +57,12 @@ python manage.py load_ingredients ingredients.json
 - DB_PORT - порт для подключения к БД PostgreSQL;
 - SECRET_KEY - сюда надо перенести значение из файла settings.py;
 - ALLOWED_HOSTS - список разрешённых хостов, например:
-```
-<ip-адрес хоста>;127.0.0.1;localhost;<доменное имя сайта>
-```
+    ```
+    <ip-адрес хоста>;127.0.0.1;localhost;<доменное имя сайта>
+    ```
 Файл .env может также содержать следующие переменные окружения:
 - DEBUG - задаёт отладочный режим работы, если определена;
-- SQLITE_DB - путь к файлу БД Sqlite. Если определена и не пуста эта переменная, то вместо БД PostgreSQL будет использоваться БД Sqlite. Переменные среды, задающие настройки для работы с БД PostgreSQL, в этом случае игнорируются.
+- SQLITE_DB - путь к файлу БД Sqlite. Если эта переменная определена и не пуста, то вместо БД PostgreSQL будет использоваться БД Sqlite. Переменные среды, задающие настройки для работы с БД PostgreSQL, в этом случае игнорируются.
 
 ## Автор
 Москалянов Е.В.
