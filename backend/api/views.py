@@ -54,33 +54,25 @@ class UserViewSet(DjoserUserViewSet):
         """Обработчик эндпойнта 'Мои подписки'."""
         return self.list(request)
 
-    @action(['post'], detail=True, serializer_class=UserSubscribeSerializer,
+    @action(['post', 'delete'], detail=True,
+            serializer_class=UserSubscribeSerializer,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
-        """Обработчик эндпойнта 'Подписаться на пользователя'."""
-        # print(f'\nDEBUG: {request.data}\n')
+        """Обработчик эндпойнтов 'Подписаться на пользователя' и
+        'Отписаться от пользователя'.
+        """
         serializer = self.get_serializer(
             get_object_or_404(User, pk=id), data=request.data
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED,
-            headers=self.get_success_headers(serializer.data)
-        )
-
-    @subscribe.mapping.delete
-    def unsubscribe(self, request, id):
-        """Обработчик эндпойнта 'Отписаться от пользователя'."""
-        author = get_object_or_404(User, pk=id)
-        if not request.user.is_subscribed_to(author):
+        if request.method == 'POST':
             return Response(
-                dict(errors='Вы не подписаны на этого автора.'),
-                status=status.HTTP_400_BAD_REQUEST
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=self.get_success_headers(serializer.data)
             )
-
-        request.user.unsubscribe_from(author)
+        
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )

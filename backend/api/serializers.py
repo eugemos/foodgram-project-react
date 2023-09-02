@@ -200,27 +200,38 @@ class ExtendedUserSerializer(UserSerializer):
 
 
 class UserSubscribeSerializer(ExtendedUserSerializer):
-    """
+    """Сериализатор для использования при подписке и отписке.
     """
     class Meta(ExtendedUserSerializer.Meta):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
     def validate(self, data):
-        # print(f'\nDEBUG: validate_id\n')
         user = self.context['request'].user
-        if user == self.instance:
-            raise serializers.ValidationError(
-                dict(errors='Нельзя подписаться на самого себя.'),
-            )
+        if self.context['request'].method == 'POST':
+            if user == self.instance:
+                raise serializers.ValidationError(
+                    dict(errors='Нельзя подписаться на самого себя.'),
+                )
 
-        if user.is_subscribed_to(self.instance):
-            raise serializers.ValidationError(
-                dict(errors='Вы уже подписаны на этого автора.'),
-            )
+            if user.is_subscribed_to(self.instance):
+                raise serializers.ValidationError(
+                    dict(errors='Вы уже подписаны на этого автора.'),
+                )
+
+        else:
+            if not user.is_subscribed_to(self.instance):
+                raise serializers.ValidationError(
+                    dict(errors='Вы не подписаны на этого автора.'),
+                )
         
         return data
 
     def update(self, instance, validated_data):
-        self.context['request'].user.subscribe_to(instance)
+        user = self.context['request'].user
+        if self.context['request'].method == 'POST':
+            user.subscribe_to(instance)
+        else:
+            user.unsubscribe_from(instance)
+            
         return instance    
         
