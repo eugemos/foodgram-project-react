@@ -13,9 +13,6 @@ from rest_framework.response import Response
 
 from recipes.models import Tag, Ingredient, Recipe
 from recipes.constants import RECIPES_ORDERING
-from recipes.user_utils import (
-    user_has_in_list, add_to_list_of_user, remove_from_list_of_user
-)
 from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
@@ -92,7 +89,7 @@ class UserViewSet(DjoserUserViewSet, UserSetActionMixin):
         'Отписаться от пользователя'.
         """
         return self.add_remove(request, id)
-        
+
 
 class TagViewSet(ReadOnlyModelViewSet):
     """Набор обработчиков, обеспечивающих доступ к ресурсу 'Теги'."""
