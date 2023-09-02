@@ -164,6 +164,54 @@ class ReducedRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
+        read_only_fields =  ('name', 'cooking_time', 'image')
+
+
+class RecipeUserSetSerializer(ReducedRecipeSerializer):
+    """Сериализатор для использования при включении рецепта в набор (список)
+    у пользователя и исключении из него.
+    """
+    set_name = 'undefined'
+
+    def validate(self, data):
+        user = self.context['request'].user
+        recipe_in_set = self.instance in getattr(user, self.set_name).all()
+        if self.context['request'].method == 'POST':
+            if recipe_in_set:
+                raise serializers.ValidationError(
+                    dict(errors='Этот рецепт уже есть в этом списке.'),
+                )
+            
+        else:
+            if not recipe_in_set:
+                raise serializers.ValidationError(
+                    dict(errors='Этого рецепта нет в этом списке.'),
+                )
+        
+        return data
+
+    def update(self, instance, validated_data):
+        user = self.context['request'].user
+        if self.context['request'].method == 'POST':
+            getattr(user, self.set_name).add(instance)
+        else:
+            getattr(user, self.set_name).remove(instance)
+            
+        return instance 
+
+
+class RecipeShoppingCartSerializer(RecipeUserSetSerializer):
+    """Сериализатор для использования при включении рецепта в список
+    покупок пользователя и исключении из него.
+    """
+    set_name = 'shopping_cart'
+
+
+class RecipeFavoritesSerializer(RecipeUserSetSerializer):
+    """Сериализатор для использования при включении рецепта в 
+    избранные рецепты пользователя и исключении из них.
+    """
+    set_name = 'favorites'
 
 
 class ExtendedUserSerializer(UserSerializer):

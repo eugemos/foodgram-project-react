@@ -1,5 +1,5 @@
 """Содержит обработчики для эндпойнтов API."""
-from django.db.models import Value, OuterRef, Exists
+from django.db.models import Value, OuterRef, Exists, Model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -20,6 +20,7 @@ from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, ReducedRecipeSerializer,
+    RecipeShoppingCartSerializer, RecipeFavoritesSerializer,
     ExtendedUserSerializer, UserSubscribeSerializer
 )
 from .filters import IngredientFilterSet, RecipeFilterBackend
@@ -94,7 +95,33 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     filterset_class = IngredientFilterSet
 
 
-class RecipeViewSet(ModelViewSet):
+class UserSetActionMixin:
+    """Обеспечивает выполнение операций со списком пользователя."""
+    user_set_item_model = NotImplemented
+
+    def add_remove(self, request, pk):
+        """Выполняет операции добавления в список
+        и исключения из него.
+        """
+        serializer = self.get_serializer(
+            get_object_or_404(self.user_set_item_model, pk=pk),
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        if request.method == 'POST':
+            return Response(
+                serializer.data,
+                status=status.HTTP_201_CREATED,
+                headers=self.get_success_headers(serializer.data)
+            )
+        
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+
+class RecipeViewSet(ModelViewSet, UserSetActionMixin):
     """Набор обработчиков, обеспечивающих доступ к ресурсам:
     - 'Рецепты';
     - 'Список покупок';
@@ -103,6 +130,7 @@ class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (RecipesPermission,)
     filter_backends = (RecipeFilterBackend,)
+    user_set_item_model = Recipe
 
     def get_queryset(self):
         """Возвращает кверисет для доступа к ресурсу 'Рецепты'."""
@@ -132,70 +160,88 @@ class RecipeViewSet(ModelViewSet):
         """Выполняет операцию изменения рецепта."""
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=[],
-            serializer_class=ReducedRecipeSerializer)
+    @action(detail=True, methods=['post', 'delete'],
+            serializer_class=RecipeShoppingCartSerializer)
     def shopping_cart(self, request, pk):
-        """Обеспечивает общий доступ к ресурсу 'Список покупок'."""
-        pass
-
-    @shopping_cart.mapping.post
-    def add_to_shopping_cart(self, request, pk):
-        """Обеспечивает выполнение операции
-        'Добавить рецепт в список покупок'.
+        """Обеспечивает выполнение операций со списком покупок.
         """
-        return self.add_to_list('shopping_cart', request, pk)
+        return self.add_remove(request, pk)
+        # serializer = self.get_serializer(
+        #     get_object_or_404(Recipe, pk=pk), data=request.data
+        # )
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # if request.method == 'POST':
+        #     return Response(
+        #         serializer.data,
+        #         status=status.HTTP_201_CREATED,
+        #         headers=self.get_success_headers(serializer.data)
+        #     )
+        
+        # return Response(
+        #     status=status.HTTP_204_NO_CONTENT
+        # )
 
-    @shopping_cart.mapping.delete
-    def remove_from_shopping_cart(self, request, pk):
-        """Обеспечивает выполнение операции
-        'Удалить рецепт из списка покупок'.
-        """
-        return self.remove_from_list('shopping_cart', request, pk)
-
-    @action(detail=True, methods=[],
-            serializer_class=ReducedRecipeSerializer)
+    @action(detail=True, methods=['post', 'delete'],
+            serializer_class=RecipeFavoritesSerializer)
     def favorite(self, request, pk):
-        """Обеспечивает общий доступ к ресурсу 'Избранное'."""
-        pass
+        """Обеспечивает выполнение операций с избранным пользователя."""
+        return self.add_remove(request, pk)
+        # serializer = self.get_serializer(
+        #     get_object_or_404(Recipe, pk=pk), data=request.data
+        # )
+        # serializer.is_valid(raise_exception=True)
+        # serializer.save()
+        # if request.method == 'POST':
+        #     return Response(
+        #         serializer.data,
+        #         status=status.HTTP_201_CREATED,
+        #         headers=self.get_success_headers(serializer.data)
+        #     )
+        
+        # return Response(
+        #     status=status.HTTP_204_NO_CONTENT
+        # )
+    #     pass
 
-    @favorite.mapping.post
-    def add_to_favorites(self, request, pk):
-        """Обеспечивает выполнение операции
-        'Добавить рецепт в избранное'.
-        """
-        return self.add_to_list('favorites', request, pk)
+    # @favorite.mapping.post
+    # def add_to_favorites(self, request, pk):
+    #     """Обеспечивает выполнение операции
+    #     'Добавить рецепт в избранное'.
+    #     """
+    #     return self.add_to_list('favorites', request, pk)
 
-    @favorite.mapping.delete
-    def remove_from_favorites(self, request, pk):
-        """Обеспечивает выполнение операции
-        'Удалить рецепт из избранного'.
-        """
-        return self.remove_from_list('favorites', request, pk)
+    # @favorite.mapping.delete
+    # def remove_from_favorites(self, request, pk):
+    #     """Обеспечивает выполнение операции
+    #     'Удалить рецепт из избранного'.
+    #     """
+    #     return self.remove_from_list('favorites', request, pk)
 
-    def add_to_list(self, list_name, request, pk):
-        """Выполняет операцию добавления рецепта в список."""
-        recipe = get_object_or_404(Recipe, pk=pk)
-        if user_has_in_list(request.user, list_name, recipe):
-            return Response(
-                dict(errors='Этот рецепт уже есть в этом списке.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    # def add_to_list(self, list_name, request, pk):
+    #     """Выполняет операцию добавления рецепта в список."""
+    #     recipe = get_object_or_404(Recipe, pk=pk)
+    #     if user_has_in_list(request.user, list_name, recipe):
+    #         return Response(
+    #             dict(errors='Этот рецепт уже есть в этом списке.'),
+    #             status=status.HTTP_400_BAD_REQUEST
+    #         )
 
-        add_to_list_of_user(request.user, list_name, recipe)
-        serializer = self.get_serializer(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     add_to_list_of_user(request.user, list_name, recipe)
+    #     serializer = self.get_serializer(recipe)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def remove_from_list(self, list_name, request, pk):
-        """Выполняет операцию удаления рецепта из списка."""
-        recipe = get_object_or_404(Recipe, pk=pk)
-        if user_has_in_list(request.user, list_name, recipe):
-            remove_from_list_of_user(request.user, list_name, recipe)
-            return Response(None, status=status.HTTP_204_NO_CONTENT)
+    # def remove_from_list(self, list_name, request, pk):
+    #     """Выполняет операцию удаления рецепта из списка."""
+    #     recipe = get_object_or_404(Recipe, pk=pk)
+    #     if user_has_in_list(request.user, list_name, recipe):
+    #         remove_from_list_of_user(request.user, list_name, recipe)
+    #         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
-        return Response(
-            dict(errors='Этого рецепта нет в этом списке.'),
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    #     return Response(
+    #         dict(errors='Этого рецепта нет в этом списке.'),
+    #         status=status.HTTP_400_BAD_REQUEST
+    #     )
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
