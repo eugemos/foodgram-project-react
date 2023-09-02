@@ -58,15 +58,16 @@ class UserViewSet(DjoserUserViewSet):
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
         """Обработчик эндпойнта 'Подписаться на пользователя'."""
-        author = get_object_or_404(User, pk=id)
-        request.data.update(id=id)
         # print(f'\nDEBUG: {request.data}\n')
-        serializer = self.get_serializer(author, data=request.data)
+        serializer = self.get_serializer(
+            get_object_or_404(User, pk=id), data=request.data
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=self.get_success_headers(serializer.data)
         )
 
     @subscribe.mapping.delete

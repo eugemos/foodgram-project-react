@@ -204,11 +204,9 @@ class UserSubscribeSerializer(ExtendedUserSerializer):
     """
     class Meta(ExtendedUserSerializer.Meta):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
-        extra_kwargs = {'id': {'read_only': False}}
 
     def validate(self, data):
         # print(f'\nDEBUG: validate_id\n')
-        # author = self.instance
         user = self.context['request'].user
         if user == self.instance:
             raise serializers.ValidationError(
