@@ -38,65 +38,9 @@ class GetTokenView(TokenCreateView):
         return response
 
 
-class UserViewSet(DjoserUserViewSet):
-    """Набор обработчиков, обеспечивающих доступ к ресурсам:
-    - 'Пользователи';
-    - 'Подписки'.
-    """
-    def get_queryset(self):
-        if self.request.path == reverse('users-subscriptions'):
-            return self.request.user.subscribed_to.all()
-
-        return super().get_queryset()
-
-    @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
-            permission_classes=[IsAuthenticated])
-    def subscriptions(self, request):
-        """Обработчик эндпойнта 'Мои подписки'."""
-        return self.list(request)
-
-    @action(['post', 'delete'], detail=True,
-            serializer_class=UserSubscribeSerializer,
-            permission_classes=[IsAuthenticated])
-    def subscribe(self, request, id):
-        """Обработчик эндпойнтов 'Подписаться на пользователя' и
-        'Отписаться от пользователя'.
-        """
-        serializer = self.get_serializer(
-            get_object_or_404(User, pk=id), data=request.data
-        )
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        if request.method == 'POST':
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED,
-                headers=self.get_success_headers(serializer.data)
-            )
-        
-        return Response(
-            status=status.HTTP_204_NO_CONTENT
-        )
-
-
-class TagViewSet(ReadOnlyModelViewSet):
-    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Теги'."""
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
-
-
-class IngredientViewSet(ReadOnlyModelViewSet):
-    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Ингредиенты'."""
-    queryset = Ingredient.objects.all()
-    serializer_class = IngredientSerializer
-    pagination_class = None
-    filter_backends = (dj_filters.DjangoFilterBackend,)
-    filterset_class = IngredientFilterSet
-
-
 class UserSetActionMixin:
-    """Обеспечивает выполнение операций со списком пользователя."""
+    """Обеспечивает выполнение операций со наборами (списками) пользователя.
+    """
     user_set_item_model = NotImplemented
 
     def add_remove(self, request, pk):
@@ -119,6 +63,51 @@ class UserSetActionMixin:
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )
+
+
+class UserViewSet(DjoserUserViewSet, UserSetActionMixin):
+    """Набор обработчиков, обеспечивающих доступ к ресурсам:
+    - 'Пользователи';
+    - 'Подписки'.
+    """
+    user_set_item_model = User
+
+    def get_queryset(self):
+        if self.request.path == reverse('users-subscriptions'):
+            return self.request.user.subscribed_to.all()
+
+        return super().get_queryset()
+
+    @action(['get'], detail=False, serializer_class=ExtendedUserSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        """Обработчик эндпойнта 'Мои подписки'."""
+        return self.list(request)
+
+    @action(['post', 'delete'], detail=True,
+            serializer_class=UserSubscribeSerializer,
+            permission_classes=[IsAuthenticated])
+    def subscribe(self, request, id):
+        """Обработчик эндпойнтов 'Подписаться на пользователя' и
+        'Отписаться от пользователя'.
+        """
+        return self.add_remove(request, id)
+        
+
+class TagViewSet(ReadOnlyModelViewSet):
+    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Теги'."""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
+
+
+class IngredientViewSet(ReadOnlyModelViewSet):
+    """Набор обработчиков, обеспечивающих доступ к ресурсу 'Ингредиенты'."""
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    pagination_class = None
+    filter_backends = (dj_filters.DjangoFilterBackend,)
+    filterset_class = IngredientFilterSet
 
 
 class RecipeViewSet(ModelViewSet, UserSetActionMixin):
@@ -163,90 +152,19 @@ class RecipeViewSet(ModelViewSet, UserSetActionMixin):
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=RecipeShoppingCartSerializer)
     def shopping_cart(self, request, pk):
-        """Обеспечивает выполнение операций со списком покупок.
-        """
+        """Выполненяет операции со списком покупок."""
         return self.add_remove(request, pk)
-        # serializer = self.get_serializer(
-        #     get_object_or_404(Recipe, pk=pk), data=request.data
-        # )
-        # serializer.is_valid(raise_exception=True)
-        # serializer.save()
-        # if request.method == 'POST':
-        #     return Response(
-        #         serializer.data,
-        #         status=status.HTTP_201_CREATED,
-        #         headers=self.get_success_headers(serializer.data)
-        #     )
-        
-        # return Response(
-        #     status=status.HTTP_204_NO_CONTENT
-        # )
 
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=RecipeFavoritesSerializer)
     def favorite(self, request, pk):
-        """Обеспечивает выполнение операций с избранным пользователя."""
+        """Выполненяет операции с избранным пользователя."""
         return self.add_remove(request, pk)
-        # serializer = self.get_serializer(
-        #     get_object_or_404(Recipe, pk=pk), data=request.data
-        # )
-        # serializer.is_valid(raise_exception=True)
-        # serializer.save()
-        # if request.method == 'POST':
-        #     return Response(
-        #         serializer.data,
-        #         status=status.HTTP_201_CREATED,
-        #         headers=self.get_success_headers(serializer.data)
-        #     )
-        
-        # return Response(
-        #     status=status.HTTP_204_NO_CONTENT
-        # )
-    #     pass
-
-    # @favorite.mapping.post
-    # def add_to_favorites(self, request, pk):
-    #     """Обеспечивает выполнение операции
-    #     'Добавить рецепт в избранное'.
-    #     """
-    #     return self.add_to_list('favorites', request, pk)
-
-    # @favorite.mapping.delete
-    # def remove_from_favorites(self, request, pk):
-    #     """Обеспечивает выполнение операции
-    #     'Удалить рецепт из избранного'.
-    #     """
-    #     return self.remove_from_list('favorites', request, pk)
-
-    # def add_to_list(self, list_name, request, pk):
-    #     """Выполняет операцию добавления рецепта в список."""
-    #     recipe = get_object_or_404(Recipe, pk=pk)
-    #     if user_has_in_list(request.user, list_name, recipe):
-    #         return Response(
-    #             dict(errors='Этот рецепт уже есть в этом списке.'),
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-
-    #     add_to_list_of_user(request.user, list_name, recipe)
-    #     serializer = self.get_serializer(recipe)
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    # def remove_from_list(self, list_name, request, pk):
-    #     """Выполняет операцию удаления рецепта из списка."""
-    #     recipe = get_object_or_404(Recipe, pk=pk)
-    #     if user_has_in_list(request.user, list_name, recipe):
-    #         remove_from_list_of_user(request.user, list_name, recipe)
-    #         return Response(None, status=status.HTTP_204_NO_CONTENT)
-
-    #     return Response(
-    #         dict(errors='Этого рецепта нет в этом списке.'),
-    #         status=status.HTTP_400_BAD_REQUEST
-    #     )
 
     @action(detail=False, methods=['get'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        """Обеспечивает выполнение операции 'Скачать список покупок'."""
+        """Выполненяет операцию 'Скачать список покупок'."""
         return HttpResponse(
             get_shopping_cart_txt(request.user),
             headers={
