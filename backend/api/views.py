@@ -20,7 +20,7 @@ from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, ReducedRecipeSerializer,
-    ExtendedUserSerializer
+    ExtendedUserSerializer, UserSubscribeSerializer
 )
 from .filters import IngredientFilterSet, RecipeFilterBackend
 from .permissions import RecipesPermission
@@ -54,28 +54,19 @@ class UserViewSet(DjoserUserViewSet):
         """Обработчик эндпойнта 'Мои подписки'."""
         return self.list(request)
 
-    @action(['post'], detail=True, serializer_class=ExtendedUserSerializer,
+    @action(['post'], detail=True, serializer_class=UserSubscribeSerializer,
             permission_classes=[IsAuthenticated])
     def subscribe(self, request, id):
         """Обработчик эндпойнта 'Подписаться на пользователя'."""
         author = get_object_or_404(User, pk=id)
-        if request.user == author:
-            return Response(
-                dict(errors='Нельзя подписаться на самого себя.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        if request.user.is_subscribed_to(author):
-            return Response(
-                dict(errors='Вы уже подписаны на этого автора.'),
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        request.user.subscribe_to(author)
-        serializer = self.get_serializer(author)
+        request.data.update(id=id)
+        # print(f'\nDEBUG: {request.data}\n')
+        serializer = self.get_serializer(author, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        headers = self.get_success_headers(serializer.data)
         return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
     @subscribe.mapping.delete

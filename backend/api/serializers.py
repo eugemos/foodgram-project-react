@@ -3,6 +3,7 @@ from base64 import b64decode
 import re
 
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
 from djoser.serializers import (
     UserSerializer as DjoserUserSerializer,
     UserCreateSerializer as DjoserUserCreateSerializer,
@@ -13,6 +14,7 @@ from rest_framework import serializers
 from recipes.models import Tag, Ingredient, Recipe, IngredientOccurence
 import recipes.serializers
 from users.constants import MAX_PASSWORD_LENGTH
+from users.models import User
 
 
 IngredientSerializer = recipes.serializers.IngredientSerializer
@@ -195,3 +197,32 @@ class ExtendedUserSerializer(UserSerializer):
         """
         limit = self.context['request'].query_params.get('recipes_limit', '')
         return int(limit) if re.fullmatch(r'\d+', limit) else 0
+
+
+class UserSubscribeSerializer(ExtendedUserSerializer):
+    """
+    """
+    class Meta(ExtendedUserSerializer.Meta):
+        read_only_fields = ('email', 'username', 'first_name', 'last_name')
+        extra_kwargs = {'id': {'read_only': False}}
+
+    def validate(self, data):
+        # print(f'\nDEBUG: validate_id\n')
+        # author = self.instance
+        user = self.context['request'].user
+        if user == self.instance:
+            raise serializers.ValidationError(
+                dict(errors='Нельзя подписаться на самого себя.'),
+            )
+
+        if user.is_subscribed_to(self.instance):
+            raise serializers.ValidationError(
+                dict(errors='Вы уже подписаны на этого автора.'),
+            )
+        
+        return data
+
+    def update(self, instance, validated_data):
+        self.context['request'].user.subscribe_to(instance)
+        return instance    
+        
