@@ -1,5 +1,5 @@
 """Содержит обработчики для эндпойнтов API."""
-from django.db.models import Value, OuterRef, Exists, Model
+from django.db.models import Value, OuterRef, Exists
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -16,7 +16,7 @@ from recipes.constants import RECIPES_ORDERING
 from users.models import User
 from .serializers import (
     TagSerializer, IngredientSerializer,
-    RecipeSerializer, ReducedRecipeSerializer,
+    RecipeSerializer,
     RecipeShoppingCartSerializer, RecipeFavoritesSerializer,
     ExtendedUserSerializer, UserSubscribeSerializer
 )
@@ -56,7 +56,7 @@ class UserSetActionMixin:
                 status=status.HTTP_201_CREATED,
                 headers=self.get_success_headers(serializer.data)
             )
-        
+
         return Response(
             status=status.HTTP_204_NO_CONTENT
         )

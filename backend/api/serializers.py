@@ -3,7 +3,6 @@ from base64 import b64decode
 import re
 
 from django.core.files.base import ContentFile
-from django.shortcuts import get_object_or_404
 from djoser.serializers import (
     UserSerializer as DjoserUserSerializer,
     UserCreateSerializer as DjoserUserCreateSerializer,
@@ -14,7 +13,6 @@ from rest_framework import serializers
 from recipes.models import Tag, Ingredient, Recipe, IngredientOccurence
 import recipes.serializers
 from users.constants import MAX_PASSWORD_LENGTH
-from users.models import User
 
 
 IngredientSerializer = recipes.serializers.IngredientSerializer
@@ -164,7 +162,7 @@ class ReducedRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'cooking_time', 'image')
-        read_only_fields =  ('name', 'cooking_time', 'image')
+        read_only_fields = ('name', 'cooking_time', 'image')
 
 
 class RecipeUserSetSerializer(ReducedRecipeSerializer):
@@ -181,13 +179,13 @@ class RecipeUserSetSerializer(ReducedRecipeSerializer):
                 raise serializers.ValidationError(
                     dict(errors='Этот рецепт уже есть в этом списке.'),
                 )
-            
+
         else:
             if not recipe_in_set:
                 raise serializers.ValidationError(
                     dict(errors='Этого рецепта нет в этом списке.'),
                 )
-        
+
         return data
 
     def update(self, instance, validated_data):
@@ -196,8 +194,8 @@ class RecipeUserSetSerializer(ReducedRecipeSerializer):
             getattr(user, self.set_name).add(instance)
         else:
             getattr(user, self.set_name).remove(instance)
-            
-        return instance 
+
+        return instance
 
 
 class RecipeShoppingCartSerializer(RecipeUserSetSerializer):
@@ -208,7 +206,7 @@ class RecipeShoppingCartSerializer(RecipeUserSetSerializer):
 
 
 class RecipeFavoritesSerializer(RecipeUserSetSerializer):
-    """Сериализатор для использования при включении рецепта в 
+    """Сериализатор для использования при включении рецепта в
     избранные рецепты пользователя и исключении из них.
     """
     set_name = 'favorites'
@@ -272,7 +270,7 @@ class UserSubscribeSerializer(ExtendedUserSerializer):
                 raise serializers.ValidationError(
                     dict(errors='Вы не подписаны на этого автора.'),
                 )
-        
+
         return data
 
     def update(self, instance, validated_data):
@@ -281,6 +279,5 @@ class UserSubscribeSerializer(ExtendedUserSerializer):
             user.subscribe_to(instance)
         else:
             user.unsubscribe_from(instance)
-            
-        return instance    
-        
+
+        return instance
