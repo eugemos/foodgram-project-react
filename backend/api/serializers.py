@@ -226,9 +226,10 @@ class ExtendedUserSerializer(UserSerializer):
 
     def get_recipes_count(self, user):
         """Возвращает значение для поля recipes_count."""
-        limit = self.get_recipes_limit()
-        count = user.recipes.count()
-        return min(limit, count) if limit else count
+        # limit = self.get_recipes_limit()
+        return user.recipes.count()
+        # count = user.recipes.count()
+        # return min(limit, count) if limit else count
 
     def get_recipes(self, user):
         """Возвращает значение для поля recipes."""
