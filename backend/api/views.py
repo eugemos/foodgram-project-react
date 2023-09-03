@@ -149,13 +149,13 @@ class RecipeViewSet(ModelViewSet, UserSetActionMixin):
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=RecipeShoppingCartSerializer)
     def shopping_cart(self, request, pk):
-        """Выполненяет операции со списком покупок."""
+        """Выполняет операции со списком покупок."""
         return self.add_remove(request, pk)
 
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=RecipeFavoritesSerializer)
     def favorite(self, request, pk):
-        """Выполненяет операции с избранным пользователя."""
+        """Выполняет операции с избранным пользователя."""
         return self.add_remove(request, pk)
 
     @action(detail=False, methods=['get'],
