@@ -8,12 +8,10 @@ from .models import User
 
 class UserAdminForm(forms.ModelForm):
     def clean_subscribed_to(self):
-        # print(f'\nINSTANCE: {self.instance.pk}\n')
-        # print(f'\nC_DATA: {self.cleaned_data}\n')
         value = self.cleaned_data['subscribed_to']
         if value.filter(pk=self.instance.pk).exists():
             raise ValidationError('Нельзя подписаться на самого себя.')
-            
+
         return value
 
 

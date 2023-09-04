@@ -1,28 +1,22 @@
 """Содержит настройки административной панели для приложения recipes."""
 from django import forms
 from django.contrib import admin
-from django.core.exceptions import ValidationError
 
 from .models import Tag, Ingredient, Recipe, IngredientOccurence
 
 
 class IngredientOccurenceAdminFormSet(forms.BaseInlineFormSet):
-    # validate_min = True
-    def clean(self):
-        if any(self.errors):
-            return
-
-        if all(self._should_delete_form(form) for form in self.forms):
-            raise ValidationError('Нельзя удалить все ингредиенты.')
+    default_error_messages = dict(
+        too_few_forms='Рецепт должен содержать хотя бы один ингредиент.'
+    )
 
 
 class IngredientOccurenceInline(admin.TabularInline):
     """Настройки отображения модели IngredientOccurence в административной
     панели.
     """
-    # formset = IngredientOccurenceAdminFormSet
+    formset = IngredientOccurenceAdminFormSet
     model = IngredientOccurence
-    # validate_min = True
     extra = 0
     min_num = 1
     verbose_name = 'Ингредиент в этом рецепте'
@@ -35,12 +29,7 @@ class IngredientOccurenceInline(admin.TabularInline):
         return occurence.ingredient.measurement_unit
 
     def get_formset(self, request, obj=None, **kwargs):
-        kwargs.update(
-            validate_min=True,
-            error_messages=dict(
-                too_few_forms='Рецепт должен содержать хотя бы один ингредиент.'
-            )
-        )
+        kwargs.update(validate_min=True)
         return super().get_formset(request, obj, **kwargs)
 
 
