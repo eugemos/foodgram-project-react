@@ -149,6 +149,12 @@ class IngredientOccurence(models.Model):
         ordering = ('ingredient',)
         verbose_name = 'использование ингредиента'
         verbose_name_plural = 'использования ингредиентов'
+        constraints = (
+            UniqueConstraint(
+                fields=('ingredient', 'recipe'),
+                name='unique_occurence'
+            ),
+        )
 
     def __str__(self):
         return f'{self.ingredient} в {self.recipe}'
