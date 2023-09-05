@@ -90,7 +90,7 @@ class Recipe(models.Model):
     )
     in_shopping_cart = models.ManyToManyField(
         get_user_model(),
-        db_table='ShoppingCart',
+        through='RecipeInShoppingCart',
         related_name='shopping_cart',
         verbose_name='В списке покупок у пользователей',
         blank=True,
