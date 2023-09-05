@@ -224,21 +224,18 @@ class ExtendedUserSerializer(UserSerializer):
 
     def get_recipes_count(self, user):
         """Возвращает значение для поля recipes_count."""
-        # limit = self.get_recipes_limit()
         return user.recipes.count()
-        # count = user.recipes.count()
-        # return min(limit, count) if limit else count
 
     def get_recipes(self, user):
         """Возвращает значение для поля recipes."""
-        limit = self.get_recipes_limit()
+        limit = self._get_recipes_limit()
         serializer = ReducedRecipeSerializer(
             user.recipes.all()[0:limit] if limit else user.recipes,
             many=True, context=self.context
         )
         return serializer.data
 
-    def get_recipes_limit(self):
+    def _get_recipes_limit(self):
         """Возвращает значение параметра recipes_limit из строки запроса,
         если он там есть. В противном случае - 0.
         """
@@ -247,8 +244,7 @@ class ExtendedUserSerializer(UserSerializer):
 
 
 class UserSubscribeSerializer(ExtendedUserSerializer):
-    """Сериализатор для использования при подписке и отписке.
-    """
+    """Сериализатор для использования при подписке и отписке."""
     class Meta(ExtendedUserSerializer.Meta):
         read_only_fields = ('email', 'username', 'first_name', 'last_name')
 
