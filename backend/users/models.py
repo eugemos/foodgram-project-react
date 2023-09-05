@@ -1,5 +1,6 @@
 """Содержит модели, используемые приложением users."""
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 from django.contrib.auth.models import AbstractUser
 
 from users import constants
@@ -25,6 +26,8 @@ class User(AbstractUser):
     )
     subscribed_to = models.ManyToManyField(
         'self',
+        through='Subscription',
+        through_fields=('user', 'subscribed_to'),
         related_name='subscribers',
         symmetrical=False,
         verbose_name='Подписки',
@@ -59,3 +62,32 @@ class User(AbstractUser):
     def set_subscriptions(self, authors):
         """Задаёт множество подписок пользователя."""
         self.subscribed_to.set(authors)
+
+
+class Subscription(models.Model):
+    """Модель, представляющая подписку пользователя."""
+    user = models.ForeignKey(
+        User,
+        related_name='subscriptions_of',
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+    )
+    subscribed_to = models.ForeignKey(
+        User,
+        related_name='subscriptions_to',
+        on_delete=models.CASCADE,
+        verbose_name='Подписан на',
+    )
+
+    class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'подписки'
+        constraints = (
+            UniqueConstraint(
+                fields=('subscribed_to', 'user'),
+                name='unique_subscription'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.subscribed_to}'

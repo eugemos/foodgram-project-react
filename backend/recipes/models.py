@@ -83,6 +83,7 @@ class Recipe(models.Model):
     )
     in_favorites = models.ManyToManyField(
         get_user_model(),
+        through='RecipeInFavorites',
         related_name='favorites',
         verbose_name='В избранных рецептах у пользователей',
         blank=True,
@@ -122,6 +123,60 @@ class Recipe(models.Model):
     def set_tags(self, tags):
         """Устанавливает набор тегов для рецепта."""
         self.tags.set(tags)
+
+
+class RecipeInFavorites(models.Model):
+    """Модель, представляющая вхождение рецепта в избранное."""
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+    )
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+    )
+
+    class Meta:
+        verbose_name = 'рецепт в избранном'
+        verbose_name_plural = 'рецепты в избранном'
+        constraints = (
+            UniqueConstraint(
+                fields=('recipe', 'user'),
+                name='unique_favorite'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.recipe} в избранном у {self.user}'
+
+
+class RecipeInShoppingCart(models.Model):
+    """Модель, представляющая вхождение рецепта в список покупок."""
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт',
+    )
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+    )
+
+    class Meta:
+        verbose_name = 'рецепт в корзине'
+        verbose_name_plural = 'рецепты в корзине'
+        constraints = (
+            UniqueConstraint(
+                fields=('recipe', 'user'),
+                name='unique_shopping_cart'
+            ),
+        )
+
+    def __str__(self):
+        return f'{self.recipe} в корзине у {self.user}'
 
 
 class IngredientOccurence(models.Model):
