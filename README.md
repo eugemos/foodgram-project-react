@@ -1,7 +1,7 @@
 # Kittygram
 ![Workflow](https://github.com/eugemos/foodgram-project-react/actions/workflows/main.yml/badge.svg
 )
-[Проект, развёрнутый в облаке](http://158.160.27.72)
+
 ## Описание проекта
 Проект представляет собой сайт для публикации рецептов.
 Он позволяет всем пользователям просматривать рецепты, опубликованные на сайте.
@@ -12,7 +12,21 @@
 - скачивать себе на компьютер список покупок в текстовом виде.
 
 ## Использованные технологии
-Python (Django, DRF), JavaScript (React), PostgreSQL, Gunicorn, Nginx, Docker
+* бэкенд:
+Python 3.10,
+Django 4.2, 
+Django Rest Framework 3.14, 
+PostgreSQL; 
+
+* фронтенд:
+JavaScript,
+React;
+
+* деплой:
+Gunicorn, 
+Nginx, 
+Docker,
+Docker Compose.
 
 ## Как развернуть проект
 1. Создать на хосте папку проекта (например, /foodgram).
@@ -55,7 +69,7 @@ Python (Django, DRF), JavaScript (React), PostgreSQL, Gunicorn, Nginx, Docker
 - POSTGRES_PASSWORD - пароль для подключения к БД PostgreSQL;
 - DB_HOST - имя контейнера-хоста БД PostgreSQL (задайте значение: db);
 - DB_PORT - порт для подключения к БД PostgreSQL;
-- SECRET_KEY - сюда надо перенести значение из файла settings.py;
+- SECRET_KEY - секретный ключ;
 - ALLOWED_HOSTS - список разрешённых хостов, например:
     ```
     <ip-адрес хоста>;127.0.0.1;localhost;<доменное имя сайта>
@@ -66,5 +80,5 @@ Python (Django, DRF), JavaScript (React), PostgreSQL, Gunicorn, Nginx, Docker
 
 В папке `infra/` репозитория проекта содержится файл `.env.example` - пример файла `.env`.
 
-## Автор
-Москалянов Е.В.
+## Автор бэкенда
+Москалянов Евгений
